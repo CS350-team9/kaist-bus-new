@@ -1,0 +1,31 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/action_info"
+        android:icon="@drawable/ic_info"
+        android:orderInCategory="1"
+        android:title="정보"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_change"
+        android:orderInCategory="2"
+        android:title="탭 순서 변경하기"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_email"
+        android:icon="@drawable/ic_email"
+        android:orderInCategory="3"
+        android:title="오류신고/의견보내기"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_sms"
+        android:orderInCategory="4"
+        android:title="급한오류신고"
+        app:showAsAction="never" />
+
+</menu>

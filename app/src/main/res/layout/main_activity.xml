@@ -1,0 +1,58 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background" />
+
+    <RelativeLayout
+        android:id="@+id/actionbar_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/actionbar_content_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
+                android:minHeight="?attr/actionBarSize"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+            <com.astuetz.PagerSlidingTabStrip
+                android:id="@+id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/tabs_height"
+                android:background="@color/colorPrimary"
+                android:clickable="false"
+                android:focusable="false"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                app:pstsDividerColor="#00FFFFFF"
+                app:pstsIndicatorColor="@color/colorAccentSecondary"
+                app:pstsIndicatorHeight="2dp"
+                app:pstsShouldExpand="false"
+                app:pstsTabPaddingLeftRight="16dp"
+                app:pstsUnderlineHeight="0dp" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_below="@+id/actionbar_content_view"
+            android:background="@drawable/base_shadow_bottom" />
+
+    </RelativeLayout>
+</RelativeLayout>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><!-- File created by the Android Action Bar Style Generator
+
+     Copyright (C) 2011 The Android Open Source Project
+     Copyright (C) 2012 readyState Software Ltd
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <!-- ffafab -->
+
+    <!-- Default -->
+    <style name="Theme.Bab" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="actionBarStyle">@style/Theme.Bab.ActionBar</item>
+    </style>
+
+    <style name="Theme.Bab.ActionBar" parent="style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="elevation">0dp</item>
+    </style>
+
+    <style name="Theme.Bab.NoActionBar" parent="@style/Theme.Bab">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Bab.NoActionBar.Black" parent="@style/Theme.Bab.NoActionBar">
+        <item name="colorPrimaryDark">#212121</item>
+    </style>
+
+    <style name="Theme.Bab.Splash" parent="@style/Theme.Bab.NoActionBar">
+        <item name="android:windowBackground">@color/colorPrimary</item>
+    </style>
+
+    <style name="Theme.Bab.NoActionBar.Light" parent="@style/Theme.Bab.NoActionBar">
+        <item name="colorPrimaryDark">@color/textcolor_strong</item>
+    </style>
+
+    <style name="Theme.Bab.Translucent" parent="@style/Theme.Bab.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <style name="Theme.Bab.Translucent.Light" parent="@style/Theme.Bab.Translucent">
+        <item name="colorPrimaryDark">@color/textcolor_strong</item>
+    </style>
+
+</resources>

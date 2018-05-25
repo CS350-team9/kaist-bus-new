@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- KAIST -->
+    <string name="tab_kaist_olev">OLEV</string>
+    <string name="tab_kaist_olev_explain">- 개발팀이 실측한 시간을 기준으로 개발되었습니다.\n- 실제 운영시간을 이보다 약간 늦거나 빠를 수 있음을 양지하여 주시길 바랍니다.</string>
+    <string name="tab_kaist_wolpyeong">본원-월평-둔산</string>
+    <string name="tab_kaist_wolpyeong_explain">- 이용자: 구성원 및 학교 방문객\n- 차량: 25인승 미니버스\n- 운행시간은 도로 사정에 따라 달라질 수 있습니다\n- 운행문의: 배차실(042-350-2316), 총무팀(042-350-2314)</string>
+    <string name="tab_kaist_sunhwan">본원-문지-화암</string>
+    <string name="tab_kaist_sunhwan_explain">- 차량: 대형버스\n- 운행업체: (주)엑스포관광\n- 비상시 연락처: 총무팀(주간, 042-350-2314), 코리아나고속관광(주/야간, 010-4335-3311)</string>
+
+</resources>
