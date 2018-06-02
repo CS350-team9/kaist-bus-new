@@ -98,6 +98,7 @@ public class BusFragment extends Fragment {
     private ImageButton mStationImgBtn;
     private TextView mNameTv;
     private FrameLayout mMainLayout;
+    /** 원형 버스 노선도 위에서 움직이는 버스를 나타내는 아이콘의 View */
     private View[] mBusView = new View[3];
     private ArrayList<TextView> mStationTvs = new ArrayList<TextView>();
     private ArrayList<View> mStationViews = new ArrayList<View>();
@@ -579,7 +580,8 @@ public class BusFragment extends Fragment {
 
 
     /**
-     * @return
+     * 현재 운행 중인 버스의 위치를 나타낸 각도의 배열을 돌려준다.
+     * @return 버스의 위치를 나타낸 각도의 배열
      */
     private int[] getCurrentBusLocations() {
 
@@ -597,7 +599,8 @@ public class BusFragment extends Fragment {
     }
 
     /**
-     * @param locations
+     * 주어진 각도를 바탕으로 각 버스 아이콘의 표시 여부 및 위치를 변경한다.
+     * @param locations 각 버스 아이콘의 각도를 나타낸 배열 (-1일 경우 버스 아이콘 숨김)
      */
     private void setCurrentBusLocations(int[] locations) {
 

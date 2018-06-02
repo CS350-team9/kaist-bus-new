@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 /**
  * Created by yearnning on 14. 12. 20..
+ * <br>기점에서 종점까지 운행하는 버스를 나타내는 클래스
  */
 public class BusModel {
 
@@ -41,6 +42,14 @@ public class BusModel {
         }
     }
 
+    /**
+     * 주어진 시간에 버스의 예상 위치를 계산하여 각도로 돌려준다.
+     *
+     * @param current_hour 시
+     * @param current_minute 분
+     * @param current_second 초
+     * @return 각도 (0...360) / 운행 시간이 아닐 경우 -1
+     */
     public int getLocation(int current_hour, int current_minute, int current_second) {
 
         int current_absoluteSecond = current_hour * 3600 + current_minute * 60 + current_second;
