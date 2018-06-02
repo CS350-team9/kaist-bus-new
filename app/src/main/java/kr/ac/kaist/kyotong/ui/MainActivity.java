@@ -1,7 +1,6 @@
 package kr.ac.kaist.kyotong.ui;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -76,6 +75,7 @@ public class MainActivity extends ActivityBase {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    /** 메인 화면의 상단 툴바에 대한 참조 (버스 시간표를 화면 전체로 확장할 때 숨기기 위한 용도) */
     private View mActionbarView;
     private PagerSlidingTabStrip tabs;
     private Toolbar mToolbar;
@@ -149,7 +149,7 @@ public class MainActivity extends ActivityBase {
             public void onPageSelected(int position) {
 
                 if (mSectionsPagerAdapter.shuttleModelArrayList.get(position).panelExpand) {
-                    hideActionbar();
+                    hideActionBarAndTabs();
                 } else {
                     showActionbar();
                 }
@@ -166,11 +166,13 @@ public class MainActivity extends ActivityBase {
     /**
      * 한 정거장의 버스 시간표를 자세히 보기 위해 화면 전체로 확장했을 때, 다른 모든 UI를 숨긴다.
      */
-    public void hideActionbar() {
+    public void hideActionBarAndTabs() {
         if (mActionBarState == ActionBarState.SHOWEN) {
             mActionBarState = ActionBarState.HIDING;
             final Animation mActionbarHideAnimation = AnimationUtils.loadAnimation(this, R.anim.base_actionbar_hide);
+            final Animation mTabsHideAnimation      = AnimationUtils.loadAnimation(this, R.anim.base_tabs_hide);
             mActionbarView.startAnimation(mActionbarHideAnimation);
+            tabs.startAnimation(mTabsHideAnimation);
             mActionBarState = ActionBarState.HIDDEN;
         }
     }
@@ -217,7 +219,9 @@ public class MainActivity extends ActivityBase {
         if (mActionBarState == ActionBarState.HIDDEN) {
             mActionBarState = ActionBarState.SHOWING;
             final Animation mActionbarShowAnimation = AnimationUtils.loadAnimation(this, R.anim.base_actionbar_show);
+            final Animation mTabsShowAnimation      = AnimationUtils.loadAnimation(this, R.anim.base_tabs_show);
             mActionbarView.startAnimation(mActionbarShowAnimation);
+            tabs.startAnimation(mTabsShowAnimation);
             mActionBarState = ActionBarState.SHOWEN;
         }
     }
@@ -329,7 +333,7 @@ public class MainActivity extends ActivityBase {
      */
     public void notifyPanelExpand(int position) {
         mSectionsPagerAdapter.shuttleModelArrayList.get(position).panelExpand = true;
-        hideActionbar();
+        hideActionBarAndTabs();
     }
 
     /**

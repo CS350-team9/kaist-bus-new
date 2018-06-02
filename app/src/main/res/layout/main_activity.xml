@@ -30,22 +30,6 @@
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-            <com.astuetz.PagerSlidingTabStrip
-                android:id="@+id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/tabs_height"
-                android:background="@color/colorPrimary"
-                android:clickable="false"
-                android:focusable="false"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                app:pstsDividerColor="#00FFFFFF"
-                app:pstsIndicatorColor="@color/colorAccentSecondary"
-                app:pstsIndicatorHeight="2dp"
-                app:pstsShouldExpand="false"
-                app:pstsTabPaddingLeftRight="16dp"
-                app:pstsUnderlineHeight="0dp" />
-
         </LinearLayout>
 
         <View
@@ -55,4 +39,23 @@
             android:background="@drawable/base_shadow_bottom" />
 
     </RelativeLayout>
+
+    <com.astuetz.PagerSlidingTabStrip
+        android:id="@+id/tabs"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/tabs_height"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="@color/colorPrimary"
+        android:clickable="false"
+        android:focusable="false"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        app:pstsDividerColor="#00FFFFFF"
+        app:pstsIndicatorColor="@color/colorAccentSecondary"
+        app:pstsIndicatorHeight="2dp"
+        app:pstsShouldExpand="false"
+        app:pstsTabPaddingLeftRight="16dp"
+        app:pstsUnderlineHeight="0dp" />
 </RelativeLayout>
