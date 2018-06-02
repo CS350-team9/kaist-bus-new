@@ -125,6 +125,12 @@ public class BusApi extends ApiBase {
         }
     }
 
+    /**
+     * 특정 버스 노선을 구성하는 모든 정거장의 목록을 생성한다.
+     *
+     * @param title_id 버스 노선의 이름을 가리키는 문자열 리소스
+     * @return 버스 정거장의 목록
+     */
     private ArrayList<BusStationModel> createStations(int title_id) {
 
         ArrayList<BusStationModel> busStationModels = new ArrayList<>();

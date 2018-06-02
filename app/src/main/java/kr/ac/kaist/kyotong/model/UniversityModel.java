@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 /**
  * Created by yearnning on 15. 1. 22..
+ * <br>한 대학교에서 운영하는 버스 노선도를 나타내는 클래스
  */
 public class UniversityModel {
 

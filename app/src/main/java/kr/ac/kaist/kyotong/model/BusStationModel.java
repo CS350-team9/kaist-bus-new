@@ -11,6 +11,7 @@ import kr.ac.kaist.kyotong.utils.DateUtils;
 
 /**
  * Created by yearnning on 14. 12. 20..
+ * <br>버스 정거장을 나타내는 클래스
  */
 public class BusStationModel {
     private static final String TAG = "BusStation";
@@ -52,7 +53,9 @@ public class BusStationModel {
     public Location location = null;
     public String name = "";
     public String name_full = "";
+    /** 원형 버스 노선도에서 정거장을 점으로 표시할 위치를 나타내는 각도(degree) */
     public int degree = 0;
+    /** 정거장의 사진을 가리키는 그림 리소스 */
     public int img_resource = -1;
 
     public ArrayList<BusTimeModel> departureTimes = new ArrayList<BusTimeModel>();
@@ -61,6 +64,9 @@ public class BusStationModel {
         departureTimes.add(busTimeModel);
     }
 
+    /**
+     * 이 정거장을 지나는 모든 버스의 출발 시간 목록을 생성한다.
+     */
     public void addHeader() {
 
         /**

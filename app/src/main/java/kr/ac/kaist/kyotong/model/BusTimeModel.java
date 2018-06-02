@@ -2,6 +2,7 @@ package kr.ac.kaist.kyotong.model;
 
 /**
  * Created by yearnning on 2014. 9. 12..
+ * <br>한 정거장에 대한 하나의 버스의 도착 시간을 나타내는 클래스.
  */
 public class BusTimeModel {
 
