@@ -41,7 +41,9 @@ import kr.ac.kaist.kyotong.utils.SizeUtils;
 import kr.ac.kaist.kyotong.api.BusApi;
 import kr.ac.kaist.kyotong.utils.MapManager;
 
-
+/**
+ * 메인 화면의 버스 노선 탭에 대응하는 노선도를 표시하는 Fragment
+ */
 public class BusFragment extends Fragment {
 
     /**
