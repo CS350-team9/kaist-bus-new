@@ -61,7 +61,7 @@ public class BusStationModel {
 
     public ArrayList<BusTimeModel> departureTimes = new ArrayList<BusTimeModel>();
 
-    /** 이 버스 정거장에서 다음 정거장까지의 경로를 구성하는 꼭짓점의 좌표 */
+    /** 이 버스 정거장에서 다음 정거장까지의 경로를 구성하는 꼭짓점의 좌표 (두 정거장의 좌표는 포함하지 않음) */
     public ArrayList<LocationCoordinates> pointsOnPathToNextStation = new ArrayList<>();
 
     public void addDepartureTime(BusTimeModel busTimeModel) {
