@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import kr.ac.kaist.kyotong.utils.DateUtils;
+import kr.ac.kaist.kyotong.utils.LocationCoordinates;
 
 /**
  * Created by yearnning on 14. 12. 20..
@@ -59,6 +60,9 @@ public class BusStationModel {
     public int img_resource = -1;
 
     public ArrayList<BusTimeModel> departureTimes = new ArrayList<BusTimeModel>();
+
+    /** 이 버스 정거장에서 다음 정거장까지의 경로를 구성하는 꼭짓점의 좌표 */
+    public ArrayList<LocationCoordinates> pointsOnPathToNextStation = new ArrayList<>();
 
     public void addDepartureTime(BusTimeModel busTimeModel) {
         departureTimes.add(busTimeModel);
