@@ -164,7 +164,7 @@ public class MainActivity extends ActivityBase {
     }
 
     /**
-     *
+     * 한 정거장의 버스 시간표를 자세히 보기 위해 화면 전체로 확장했을 때, 다른 모든 UI를 숨긴다.
      */
     public void hideActionbar() {
         if (mActionBarState == ActionBarState.SHOWEN) {
@@ -211,7 +211,7 @@ public class MainActivity extends ActivityBase {
     }
 
     /**
-     *
+     * 한 정거장의 버스 시간표가 확장되었던 상태에서 원래 크기로 돌아갔을 때, 숨겼던 UI를 다시 보여준다.
      */
     public void showActionbar() {
         if (mActionBarState == ActionBarState.HIDDEN) {
@@ -322,11 +322,21 @@ public class MainActivity extends ActivityBase {
 
     }
 
+    /**
+     * BusFragment에서 버스 시간표가 화면 전체로 확장되었다는 것을 알려줄 때 호출하는 메서드
+     *
+     * @param position 현재 활성화된 버스 노선 탭의 번호
+     */
     public void notifyPanelExpand(int position) {
         mSectionsPagerAdapter.shuttleModelArrayList.get(position).panelExpand = true;
         hideActionbar();
     }
 
+    /**
+     * BusFragment에서 버스 시간표가 원래 위치로 되돌아갔다는 것을 알려줄 때 호출하는 메서드
+     *
+     * @param position 현재 활성화된 버스 노선 탭의 번호
+     */
     public void notifyPanelCollpased(int position) {
         mSectionsPagerAdapter.shuttleModelArrayList.get(position).panelExpand = false;
         showActionbar();
