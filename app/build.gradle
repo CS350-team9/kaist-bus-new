@@ -39,6 +39,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:10.2.1'
     compile 'com.google.android.gms:play-services-base:10.2.1'
     compile 'com.google.android.gms:play-services-analytics:10.2.1'
+    implementation 'com.google.android.gms:play-services-maps:15.0.1'
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
     compile 'com.sothree.slidinguppanel:library:3.3.0'
     compile 'asia.ivity.android:drag-sort-listview:1.0'
