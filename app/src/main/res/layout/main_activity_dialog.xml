@@ -4,6 +4,11 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <!--
+        앱을 나갈 때 확인 여부를 묻는 팝업 레이아웃
+        광고를 삽입하기 위한 용도로 보이나, 현재 광고는 비활성화되어 있음
+    -->
+
     <include
         android:id="@+id/ad_view"
         layout="@layout/main_activity_dialog_ad"

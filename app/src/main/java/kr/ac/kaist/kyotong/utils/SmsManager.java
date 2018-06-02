@@ -11,12 +11,17 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 /**
  * Created by yearnning on 15. 1. 27..
+ * <br>개발자에게 SMS 보내기 기능을 제공하는 클래스
  */
 public class SmsManager {
 
     private Context mContext = null;
     private String mNumber = null;
 
+    /**
+     * @param context   SMS 관련 intent를 시작할 때 참조할 activity
+     * @param number    SMS를 보낼 전화번호
+     */
     public SmsManager(Context context, String number) {
         this.mNumber = number;
         this.mContext = context;

@@ -58,7 +58,9 @@ public class ShuttleModel {
 
     public int id = -1;
     public Type type = null;
+    /** 버스 노선도의 이름을 나타낸 문자열 리소스 */
     public int title = -1;
+    /** 버스 노선도에 대한 설명을 나타낸 문자열 리소스 */
     public int explain = -1;
     public int weight = 0;
     public boolean panelExpand = false;

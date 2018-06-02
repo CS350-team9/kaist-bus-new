@@ -192,7 +192,7 @@ public class MainActivity extends ActivityBase {
     }
 
     /**
-     *
+     * 앱을 처음 실행했을 때 주의사항을 표시하는 용도로 보이나, 현재 안 쓰고 있음
      */
     private void showFirstOpenDialog() {
 
@@ -249,6 +249,9 @@ public class MainActivity extends ActivityBase {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * 현재 활성화된 버스 노선도에 대한 설명을 팝업 창으로 보여준다.
+     */
     private void showInfo() {
         ShuttleModel shuttleModel = mSectionsPagerAdapter.shuttleModelArrayList.get(mViewPager.getCurrentItem());
 

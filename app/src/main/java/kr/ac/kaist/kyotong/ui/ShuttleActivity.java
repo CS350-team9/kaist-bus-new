@@ -19,6 +19,9 @@ import kr.ac.kaist.kyotong.model.UniversityModel;
 import kr.ac.kaist.kyotong.utils.list.ShuttleListViewManager;
 import kr.ac.kaist.kyotong.utils.prefs.ShuttlePreference;
 
+/**
+ * 버스 노선 탭의 순서를 변경하는 설정 창의 클래스
+ */
 public class ShuttleActivity extends ActivityBase {
 
     private DragSortListView mLv;

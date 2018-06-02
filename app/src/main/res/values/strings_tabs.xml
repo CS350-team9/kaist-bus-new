@@ -2,6 +2,7 @@
 <resources>
 
     <!-- KAIST -->
+    <!-- 버스 노선의 이름 및 간단한 설명 문자열 -->
     <string name="tab_kaist_olev">OLEV</string>
     <string name="tab_kaist_olev_explain">- 개발팀이 실측한 시간을 기준으로 개발되었습니다.\n- 실제 운영시간을 이보다 약간 늦거나 빠를 수 있음을 양지하여 주시길 바랍니다.</string>
     <string name="tab_kaist_wolpyeong">본원-월평-둔산</string>

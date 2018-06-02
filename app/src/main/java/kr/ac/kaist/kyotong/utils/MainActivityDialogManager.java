@@ -11,6 +11,7 @@ import kr.ac.kaist.kyotong.ui.MainActivity;
 
 /**
  * Created by joonyoung.yi on 16. 4. 6..
+ * <br>메인 화면에서 뒤로 가기 버튼을 눌렀을 때의 동작을 담당하는 클래스
  */
 public class MainActivityDialogManager {
 
@@ -40,6 +41,12 @@ public class MainActivityDialogManager {
                 1);
     }
 
+    /**
+     * 종료 확인 여부를 묻는 창의 View를 만들어서 돌려준다.
+     *
+     * @param mainActivity
+     * @return 종료 확인 여부를 묻는 창의 View
+     */
     private View createCustomView(MainActivity mainActivity) {
 
         View mCustomView = mainActivity.getLayoutInflater().inflate(R.layout.main_activity_dialog, null);

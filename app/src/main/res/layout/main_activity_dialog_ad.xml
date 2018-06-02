@@ -4,6 +4,8 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
+    <!-- 앱 종료 확인 여부를 묻는 팝업에 들어가는 광고 레이아웃 -->
+
     <ImageView
         android:id="@+id/native_ad_iv"
         android:layout_width="match_parent"

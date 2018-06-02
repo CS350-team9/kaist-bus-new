@@ -7,6 +7,7 @@ import android.net.Uri;
 
 /**
  * Created by yearnning on 15. 1. 22..
+ * <br>개발자에게 이메일을 보내는 기능을 제공하는 클래스
  */
 public class EmailManager {
 
