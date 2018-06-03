@@ -878,19 +878,9 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
                     .color(Color.WHITE));
             }
         }
-
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(busStationModels.get(0).location.getLatitude(), busStationModels.get(0).location.getLongitude())));
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(13));
-//        LatLng SEOUL = new LatLng(37.56, 126.97);
-//
-//        MarkerOptions markerOptions = new MarkerOptions();
-//        markerOptions.position(SEOUL);
-//        markerOptions.title("서울");
-//        markerOptions.snippet("한국의 수도");
-//        googleMap.addMarker(markerOptions);
-//
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(SEOUL));
-//        googleMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+
     }
 }
 
