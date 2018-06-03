@@ -2,7 +2,9 @@ package kr.ac.kaist.kyotong.ui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,8 +26,16 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -37,6 +47,7 @@ import kr.ac.kaist.kyotong.model.BusModel;
 
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
+import kr.ac.kaist.kyotong.utils.LocationCoordinates;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
 
 import kr.ac.kaist.kyotong.api.BusApi;
@@ -843,8 +854,43 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
         super.onLowMemory();
     }
 
+    @Override
     public void onMapReady(GoogleMap googleMap) {
+        BusApi busApi = new BusApi(R.string.tab_kaist_olev);
 
+        ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
+
+        for (BusStationModel bm : busStationModels) {
+            // marker at stations;
+            Location loc = bm.location;
+            LatLng thisStation = new LatLng(loc.getLatitude(), loc.getLongitude());
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(thisStation);
+            markerOptions.title(bm.name);
+            googleMap.addMarker(markerOptions);
+
+            // polyline at path
+            ArrayList<LocationCoordinates> pointsOnPathToNextStation = bm.pointsOnPathToNextStation;
+            for (LocationCoordinates path : pointsOnPathToNextStation) {
+                Polyline line = googleMap.addPolyline(new PolylineOptions()
+                    .add(thisStation, new LatLng(path.latitude, path.longitude))
+                    .width(5)
+                    .color(Color.WHITE));
+            }
+        }
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(busStationModels.get(0).location.getLatitude(), busStationModels.get(0).location.getLongitude())));
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+//        LatLng SEOUL = new LatLng(37.56, 126.97);
+//
+//        MarkerOptions markerOptions = new MarkerOptions();
+//        markerOptions.position(SEOUL);
+//        markerOptions.title("서울");
+//        markerOptions.snippet("한국의 수도");
+//        googleMap.addMarker(markerOptions);
+//
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(SEOUL));
+//        googleMap.animateCamera(CameraUpdateFactory.zoomTo(10));
     }
 }
 
