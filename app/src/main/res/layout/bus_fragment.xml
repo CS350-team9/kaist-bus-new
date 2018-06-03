@@ -19,6 +19,12 @@
             android:layout_height="?attr/actionBarSize"
             android:layout_marginBottom="48dp" />
 
+        <Switch
+            android:id="@+id/toggle_google_map_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Switch" />
+
         <kr.ac.kaist.kyotong.ui.CircularBusRouteMapView
             android:id="@+id/circular_bus_route_view"
             android:layout_width="match_parent"

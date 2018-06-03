@@ -54,6 +54,9 @@ import kr.ac.kaist.kyotong.ui.CircularBusRouteMapView;
 import kr.ac.kaist.kyotong.api.BusApi;
 import kr.ac.kaist.kyotong.utils.MapManager;
 
+import android.widget.Switch;
+import android.widget.CompoundButton;
+
 //TODO Google Map 관련 코드를 Custom View 클래스에 몰아넣기
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.GoogleMap;
@@ -114,10 +117,11 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
     private ImageButton mStationMapBtn;
     private ImageButton mStationImgBtn;
     private TextView mNameTv;
-    private FrameLayout mMainLayout;
 
     /** Custom View */
     CircularBusRouteMapView circularBusRouteMapView;
+    /** 원형 다이어그램과 구글 맵 중 하나를 토글하는 스위치 */
+    private Switch toggleGoogleMapButton;
     private ListView mLv;
     private LvAdapter mLvAdapter;
 
@@ -173,6 +177,21 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
         mLayout = (SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout);
 
         circularBusRouteMapView = rootView.findViewById(R.id.circular_bus_route_view);
+        toggleGoogleMapButton = rootView.findViewById(R.id.toggle_google_map_switch);
+
+        toggleGoogleMapButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    circularBusRouteMapView.setVisibility(View.GONE);
+                    mapView.setVisibility(View.VISIBLE);
+                }
+                else {
+                    circularBusRouteMapView.setVisibility(View.VISIBLE);
+                    mapView.setVisibility(View.GONE);
+                }
+            }
+        });
 
         mStationMapBtn = (ImageButton) rootView.findViewById(R.id.station_map_btn);
         mStationImgBtn = (ImageButton) rootView.findViewById(R.id.station_img_btn);
@@ -240,7 +259,7 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 //            }
 //        });
 
-        mapView = (MapView) rootView.findViewById(R.id.mapView);
+        mapView = rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
