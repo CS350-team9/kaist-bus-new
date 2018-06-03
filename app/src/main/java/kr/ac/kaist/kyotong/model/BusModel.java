@@ -1,7 +1,5 @@
 package kr.ac.kaist.kyotong.model;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 
 /**
@@ -9,8 +7,7 @@ import java.util.ArrayList;
  * <br>기점에서 종점까지 운행하는 버스를 나타내는 클래스
  */
 public class BusModel {
-
-    private static final String TAG = "BUS";
+    private static final String TAG = BusModel.class.getName();
 
     private ArrayList<BusStationModel> busDepartureStations = new ArrayList<BusStationModel>();
     public ArrayList<BusTimeModel> busDepartureTimes = new ArrayList<BusTimeModel>();
@@ -29,88 +26,87 @@ public class BusModel {
         return busDepartureStations.get(index);
     }
 
-    private boolean exist(int current_hour, int current_minute, int current_second) {
+    /**
+     * 이 버스가 주어진 시간에 운행 중인지 확인한다.
+     *
+     * @param time 시간 값
+     * @return 버스 운행 여부
+     */
+    public boolean isActive(BusTimeModel time) {
+        int seconds = time.getAbsoluteSeconds();
+        int departureSeconds = busDepartureTimes.get(0).getAbsoluteSeconds();
+        int arrivalSeconds = busArrivalTimes.get(busArrivalTimes.size() - 1).getAbsoluteSeconds();
 
-        int departure_abssec = busDepartureTimes.get(0).getAbsoluteSecond();
-        int arrival_abssec = busArrivalTimes.get(busArrivalTimes.size() - 1).getAbsoluteSecond();
-        int current_abssec = current_second + current_minute * 60 + current_hour * 3600;
-
-        if (departure_abssec <= current_abssec && current_abssec < arrival_abssec) {
-            return true;
-        } else {
-            return false;
-        }
+        return departureSeconds <= seconds && seconds < arrivalSeconds;
     }
 
     /**
-     * 주어진 시간에 버스의 예상 위치를 계산하여 각도로 돌려준다.
+     * 이 버스가 주어진 시간에 정거장 A에서 정거장 B로 이동하고 있을 때, A ~ B 사이의 거리를 얼마나
+     * 이동했는지 0과 1 사이의 값으로 나타낸다.
      *
-     * @param current_hour 시
-     * @param current_minute 분
-     * @param current_second 초
-     * @return 각도 (0...360) / 운행 시간이 아닐 경우 -1
+     * <p>이 버스가 운행하는 시간대가 아닐 때는 0보다 작은 값을 돌려준다.</p>
+     *
+     * @param time 시간
+     * @return 두 정거장 간의 이동 거리 (0 ~ 1), 운행 중인 버스가 아닐 경우 음수
      */
-    public int getLocation(int current_hour, int current_minute, int current_second) {
+    public double getEstimatedProgressBetweenStations(BusTimeModel time) {
+        int arrivingStationIndex = getLastDepartedStationAt(time);
 
-        int current_absoluteSecond = current_hour * 3600 + current_minute * 60 + current_second;
+        if (arrivingStationIndex == 0 || arrivingStationIndex == busArrivalStations.size())
+            return -1.0;
 
-        if (exist(current_hour, current_minute, current_second)) {
+        int departingStationIndex = arrivingStationIndex - 1;
+        int departingTime = busDepartureTimes.get(departingStationIndex).getAbsoluteSeconds();
+        int arrivingTime = busArrivalTimes.get(arrivingStationIndex).getAbsoluteSeconds();
 
-            BusTimeModel busDepartureTime;
-            BusTimeModel busArrivalTime;
-            BusTimeModel busDepartureTime_next;
+        int seconds = time.getAbsoluteSeconds();
+        return 1.0 * (arrivingTime - seconds) / (arrivingTime - departingTime);
+    }
 
-            for (int i = 0; i < this.size() - 1; i++) {
+    /**
+     * 이 버스가 주어진 시간에 운행 중일 때, 도착 예정인 정거장의 index를 돌려준다.
+     *
+     * <p>만약 {@code time}이 운행 시간 이전이라면 0을 반환하며, 운행 시간 이후라면 정거장의 수와 같은 값을 반환한다.</p>
+     *
+     * @param time 시간
+     * @return 다음 도착 예정인 정거장의 index (0 ... 버스 정거장 수)
+     */
+    private int getLastDepartedStationAt(BusTimeModel time) {
+        int seconds = time.getAbsoluteSeconds();
 
-                /**
-                 *
-                 */
-                busDepartureTime = busDepartureTimes.get(i);
-                busArrivalTime = busArrivalTimes.get(i);
-                busDepartureTime_next = busDepartureTimes.get(i + 1);
-
-                /**
-                 *
-                 */
-                if ((busDepartureTime.getAbsoluteSecond() <= current_absoluteSecond
-                        && current_absoluteSecond < busDepartureTime_next.getAbsoluteSecond())) {
-
-                    if (current_absoluteSecond >= busArrivalTime.getAbsoluteSecond()) {
-                        Log.d(TAG, "CASE 1 -> " + busArrivalStations.get(i).degree);
-                        return busArrivalStations.get(i).degree;
-                    }
-
-                    int left = current_absoluteSecond - busDepartureTime.getAbsoluteSecond();
-                    int right = busArrivalTime.getAbsoluteSecond() - current_absoluteSecond;
-
-                    Log.d(TAG, "CASE 2 -> " + Math.round((float) (busDepartureStations.get(i).degree * right
-                            + busArrivalStations.get(i).degree * left)
-                            / (float) (left + right)));
-                    return Math.round((float) (busDepartureStations.get(i).degree * right
-                            + busArrivalStations.get(i).degree * left)
-                            / (float) (left + right));
-                }
-            }
-
-            int i = this.size() - 1;
-            busDepartureTime = busDepartureTimes.get(i);
-            busArrivalTime = busArrivalTimes.get(i);
-            if (current_absoluteSecond < busArrivalTime.getAbsoluteSecond()) {
-
-                int left = current_absoluteSecond - busDepartureTime.getAbsoluteSecond();
-                int right = busArrivalTime.getAbsoluteSecond() - current_absoluteSecond;
-
-                Log.d(TAG, "CASE 3 -> " + Math.round((float) (busDepartureStations.get(i).degree * right
-                        + busArrivalStations.get(i).degree * left)
-                        / (float) (left + right)));
-                return Math.round((float) (busDepartureStations.get(i).degree * right
-                        + busArrivalStations.get(i).degree * left)
-                        / (float) (left + right));
-            }
+        int arrivingStationIndex = 0;
+        while (arrivingStationIndex < busArrivalTimes.size()) {
+            if (seconds < busArrivalTimes.get(arrivingStationIndex).getAbsoluteSeconds())
+                break;
+            ++arrivingStationIndex;
         }
+        return arrivingStationIndex;
+    }
 
-        //Log.d(TAG, "CASE 4");
-        return -1;
+    /**
+     * 주어진 시간에 버스의 예상 위치를 계산하여 원형 그래프에 표시할 수 있는 각도로 돌려준다.
+     *
+     * @param time  시간
+     * @return 각도 (0 <= value <= 360) / 운행 시간이 아닐 경우 -1
+     */
+    public int getAngle(BusTimeModel time) {
+        int arrivingStationIndex = getLastDepartedStationAt(time);
+
+        if (arrivingStationIndex == 0 || arrivingStationIndex == busArrivalStations.size())
+            return -1;
+
+        int departingStationIndex = arrivingStationIndex - 1;
+
+        int departingTime = busDepartureTimes.get(departingStationIndex).getAbsoluteSeconds();
+        int arrivingTime = busArrivalTimes.get(arrivingStationIndex).getAbsoluteSeconds();
+
+        int seconds = time.getAbsoluteSeconds();
+        double progress = 1.0 * (arrivingTime - seconds) / (arrivingTime - departingTime);
+
+        int departingStationAngle = busDepartureStations.get(departingStationIndex).degree;
+        int arrivingStationAngle = busArrivalStations.get(arrivingStationIndex).degree;
+
+        return (int) Math.round(progress * (arrivingStationAngle - departingStationAngle) + departingStationAngle);
     }
 
 

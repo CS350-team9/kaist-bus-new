@@ -1,13 +1,9 @@
 package kr.ac.kaist.kyotong.model;
 
 import android.location.Location;
-import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
 
-import kr.ac.kaist.kyotong.utils.DateUtils;
 import kr.ac.kaist.kyotong.utils.LocationCoordinates;
 
 /**
@@ -69,58 +65,29 @@ public class BusStationModel {
     }
 
     /**
-     * 이 정거장을 지나는 모든 버스의 출발 시간 목록을 생성한다.
+     * 버스 시간표의 내일/모레 도착 항목을 알아보기 좋게 구분자(헤더)를 추가한다.
      */
     public void addHeader() {
 
-        /**
-         *
-         */
+        //내일 구분자
         int i = 0;
-        while (i < departureTimes.size() && departureTimes.get(i).getAbsoluteSecond() <= 24 * 3600) {
+        while (i < departureTimes.size() && departureTimes.get(i).getAbsoluteSeconds() <= 24 * 3600) {
             i++;
         }
-        departureTimes.add(i, createBusTimeHeader(1));
+        BusTimeModel divider = new BusTimeModel();
+        divider.setDividerDayOffset(1);
+        departureTimes.add(i, divider);
         i++;
 
-        /**
-         *
-         */
-        while (i < departureTimes.size() && departureTimes.get(i).getAbsoluteSecond() <= 48 * 3600) {
+        //모레 구분자
+        while (i < departureTimes.size() && departureTimes.get(i).getAbsoluteSeconds() <= 48 * 3600) {
             i++;
         }
         if (i < departureTimes.size()) {
-            departureTimes.add(i, createBusTimeHeader(2));
+            divider = new BusTimeModel();
+            divider.setDividerDayOffset(2);
+            departureTimes.add(i, divider);
         }
-    }
-
-    private BusTimeModel createBusTimeHeader(int date_offset) {
-
-        BusTimeModel busTimeModelHeader = new BusTimeModel();
-
-        Calendar c = Calendar.getInstance();
-        c.add(Calendar.DATE, date_offset);
-        if (c.get(Calendar.HOUR_OF_DAY) < 4) {
-            c.add(Calendar.DATE, -1);
-        }
-
-        int month = c.get(Calendar.MONTH) + 1;
-        int day = c.get(Calendar.DATE);
-        String day_str = c.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
-
-        if (date_offset == 1) {
-            busTimeModelHeader.header = String.format("내일(%d월 %d일 %s)", month, day, day_str);
-        } else if (date_offset == 2) {
-            busTimeModelHeader.header = String.format("모레(%d월 %d일 %s)", month, day, day_str);
-        } else {
-            Log.e(TAG, "There doesn't exist this date_offset");
-        }
-
-        if (DateUtils.isHoliday(date_offset)) {
-            busTimeModelHeader.header_textColor = 0xFFF44336;
-        }
-
-        return busTimeModelHeader;
     }
 
     /**
@@ -129,9 +96,8 @@ public class BusStationModel {
     public void updateHeader() {
         for (int i = 0; i < departureTimes.size(); i++) {
             BusTimeModel busTimeModel = departureTimes.get(i);
-            if (busTimeModel.header != null && busTimeModel.header.substring(0, 2).equals("모레")) {
-                departureTimes.remove(i);
-                departureTimes.add(i, createBusTimeHeader(1));
+            if (busTimeModel.getDividerDayOffset() == 2) {
+                busTimeModel.setDividerDayOffset(1);
                 break;
             }
         }

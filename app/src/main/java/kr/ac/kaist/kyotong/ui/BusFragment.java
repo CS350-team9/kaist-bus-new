@@ -386,9 +386,6 @@ public class BusFragment extends Fragment {
         mLvAdapter.busTimeModels.addAll(busStationModels.get(index).departureTimes);
         mLvAdapter.notifyDataSetChanged();
 
-        for (BusTimeModel busTimeModel : mLvAdapter.busTimeModels) {
-            Log.d(TAG, "time_str -> " + busTimeModel.time_str + ", header -> " + busTimeModel.header);
-        }
         mNameTv.setText(busStationModel.name_full);
 
         /**
@@ -465,7 +462,7 @@ public class BusFragment extends Fragment {
 
                 handler.post(new Runnable() {
                                  public void run() {
-                                     circularBusRouteMapView.updateBuses(buses, current_hour, current_minute, current_second);
+                                     circularBusRouteMapView.updateBuses(buses);
 
                                      mLvAdapter.notifyDataSetChanged();
                                      if (mShowErrorView && !mUpdateStationRunning && mBusApiTask == null) {
@@ -572,22 +569,25 @@ public class BusFragment extends Fragment {
              * Data Import and export
 			 */
 
-            if (busTimeModel.header != null) {
+            if (busTimeModel.isDivider()) {
                 viewHolder.mContentView.setVisibility(View.GONE);
                 viewHolder.mHeaderTv.setVisibility(View.VISIBLE);
-                viewHolder.mHeaderTv.setText(busTimeModel.header);
-                viewHolder.mHeaderTv.setTextColor(busTimeModel.header_textColor);
+                viewHolder.mHeaderTv.setText(busTimeModel.getHeaderStr());
+                int headerTextColor = 0xFF8A8A8A;
+                if (busTimeModel.isHoliday())
+                    headerTextColor = 0xFFF44336;
+                viewHolder.mHeaderTv.setTextColor(headerTextColor);
 
             } else {
                 viewHolder.mContentView.setVisibility(View.VISIBLE);
                 viewHolder.mHeaderTv.setVisibility(View.GONE);
 
-                if (busTimeModel.indicator == null) {
-                    viewHolder.mTimeTv.setText(busTimeModel.time_str);
+                if (!busTimeModel.isIndicator()) {
+                    viewHolder.mTimeTv.setText(busTimeModel.getTimeStr());
                     viewHolder.mLeftTv.setVisibility(View.VISIBLE);
-                    viewHolder.mLeftTv.setText(busTimeModel.left_time_str);
+                    viewHolder.mLeftTv.setText(busTimeModel.getLeftTimeString());
                 } else {
-                    viewHolder.mTimeTv.setText(busTimeModel.indicator);
+                    viewHolder.mTimeTv.setText(busTimeModel.getIndicatorString());
                     viewHolder.mLeftTv.setVisibility(View.GONE);
                 }
             }
@@ -609,19 +609,7 @@ public class BusFragment extends Fragment {
         }
 
         private void updateLeftTimeStrInTickets() {
-
-            /**
-             *
-             */
-            for (BusTimeModel busTimeModel : busTimeModels) {
-                if (busTimeModel.header != null) {
-                    continue;
-                }
-                busTimeModel.updateLeftTimeStr(current_hour, current_minute, current_second);
-            }
-
-            if ((busTimeModels.size() > 1) && (busTimeModels.get(0).indicator != null)
-                    && (current_hour >= 24)) {
+            if (busTimeModels.size() > 1 && busTimeModels.get(0).isIndicator() && current_hour >= 24) {
                 busTimeModels.remove(0);
                 busTimeModels.remove(0);
 
@@ -630,15 +618,12 @@ public class BusFragment extends Fragment {
                 }
             }
 
-            while ((busTimeModels.size() > 0)
-                    && (busTimeModels.get(0).left_time_str != null)
-                    && (busTimeModels.get(0).left_time_str.equals(" - "))) {
+            while (busTimeModels.size() > 0 && busTimeModels.get(0).isOverdue())
                 busTimeModels.remove(0);
-            }
 
-            if ((busTimeModels.size() > 0) && (busTimeModels.get(0).header != null)) {
+            if (busTimeModels.size() > 0 && busTimeModels.get(0).isDivider()) {
                 BusTimeModel busTimeModel = new BusTimeModel();
-                busTimeModel.indicator = "당일 버스 운행은 종료되었습니다";
+                busTimeModel.setIndicatorString("당일 버스 운행은 종료되었습니다");
                 busTimeModels.add(0, busTimeModel);
             }
         }

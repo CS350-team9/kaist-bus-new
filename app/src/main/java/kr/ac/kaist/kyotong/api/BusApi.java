@@ -39,14 +39,14 @@ public class BusApi extends ApiBase {
         /**
          * create Today Buses.
          */
-        ArrayList<BusModel> todayBuses = createTodayBuses(title_id, busStationModels);
+        ArrayList<BusModel> todayBuses = createTodayBuses(title_id);
         addBusTimeInBusStations(busStationModels, todayBuses, true);
         buses.addAll(todayBuses);
 
         /**
          * create Tomorrow Buses.
          */
-        ArrayList<BusModel> tomorrowBuses = createTomorrowBuses(title_id, busStationModels);
+        ArrayList<BusModel> tomorrowBuses = createTomorrowBuses(title_id);
         addBusTimeInBusStations(busStationModels, tomorrowBuses, false);
 
         /**
@@ -61,7 +61,7 @@ public class BusApi extends ApiBase {
 
     }
 
-    private ArrayList<BusModel> createTodayBuses(int title_id, ArrayList<BusStationModel> busStationModels) {
+    private ArrayList<BusModel> createTodayBuses(int title_id) {
 
         boolean holiday;
         if (DateUtils.beforeFourAM()) {
@@ -73,13 +73,13 @@ public class BusApi extends ApiBase {
         }
 
         if (holiday) {
-            return createHolidayBuses(title_id, busStationModels);
+            return createHolidayBuses(title_id);
         } else {
-            return createWeekdayBuses(title_id, busStationModels);
+            return createWeekdayBuses(title_id);
         }
     }
 
-    private ArrayList<BusModel> createTomorrowBuses(int title_id, ArrayList<BusStationModel> busStationModels) {
+    private ArrayList<BusModel> createTomorrowBuses(int title_id) {
 
         boolean holiday;
         if (DateUtils.beforeFourAM()) {
@@ -89,9 +89,9 @@ public class BusApi extends ApiBase {
         }
 
         if (holiday) {
-            return createHolidayBuses(title_id, busStationModels);
+            return createHolidayBuses(title_id);
         } else {
-            return createWeekdayBuses(title_id, busStationModels);
+            return createWeekdayBuses(title_id);
         }
     }
 
@@ -108,7 +108,7 @@ public class BusApi extends ApiBase {
         } else {
             for (BusStationModel busStationModel : busStationModels) {
                 BusTimeModel busTimeModel = new BusTimeModel();
-                busTimeModel.indicator = "주말 및 공휴일은 운행하지 않습니다";
+                busTimeModel.setIndicatorString("주말 및 공휴일은 운행하지 않습니다");
                 if (today)
                     busTimeModel.setTime(24, 0);
                 else
@@ -432,38 +432,15 @@ public class BusApi extends ApiBase {
      * @param busStationModels
      * @return
      */
-    private ArrayList<BusModel> createHolidayBuses(int title_id, ArrayList<BusStationModel> busStationModels) {
-
+    private ArrayList<BusModel> createHolidayBuses(int title_id) {
         ArrayList<BusModel> buses = new ArrayList<>();
 
         if (title_id == R.string.tab_kaist_sunhwan) {
+            for (int h = 7; h < 26; h += 3)
+                buses.add(createBus(h, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
 
-            ArrayList<String> times_str;
-
-            for (int h = 7; h < 26; h += 3) {
-
-                times_str = new ArrayList<>();
-                times_str.add(String.format("%02d:50", h));
-                times_str.add(String.format("%02d:00", h + 1));
-                times_str.add(String.format("%02d:10", h + 1));
-                times_str.add(String.format("%02d:14", h + 1));
-                times_str.add(String.format("%02d:30", h + 1));
-                times_str.add(String.format("%02d:45", h + 1));
-                times_str.add(String.format("%02d:50", h + 1));
-                buses.add(createBus(times_str, 0));
-            }
-
-            for (int h = 9; h < 25; h += 3) {
-                times_str = new ArrayList<>();
-                times_str.add(String.format("%02d:20", h));
-                times_str.add(String.format("%02d:30", h));
-                times_str.add(String.format("%02d:40", h));
-                times_str.add(String.format("%02d:44", h));
-                times_str.add(String.format("%02d:00", h + 1));
-                times_str.add(String.format("%02d:15", h + 1));
-                times_str.add(String.format("%02d:20", h + 1));
-                buses.add(createBus(times_str, 0));
-            }
+            for (int h = 9; h < 25; h += 3)
+                buses.add(createBus(h, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
         }
 
         return buses;
@@ -471,11 +448,9 @@ public class BusApi extends ApiBase {
 
     /**
      * @param title_id
-     * @param busStationModels
      * @return
      */
-    private ArrayList<BusModel> createWeekdayBuses(int title_id, ArrayList<BusStationModel> busStationModels) {
-
+    private ArrayList<BusModel> createWeekdayBuses(int title_id) {
         ArrayList<BusModel> buses = new ArrayList<>();
 
         switch (title_id) {
@@ -484,139 +459,47 @@ public class BusApi extends ApiBase {
              * KAIST
              */
             case R.string.tab_kaist_olev:
-                for (int h = 8; h <= 17; h++) {
-                    int[] ms = {0, 15, 30, 45};
-                    for (int m : ms) {
-                        if ((h != 8 || m >= 30) && (h != 17 || m == 0) && (h != 12)) {
-                            BusModel busModel = new BusModel();
-                            addPathInBus(busModel, 0, String.format("%02d:%02d", h, m), 1, String.format("%02d:%02d", h, m + 1));
-                            addPathInBus(busModel, 1, String.format("%02d:%02d", h, m + 1), 2, String.format("%02d:%02d", h, m + 2));
-                            addPathInBus(busModel, 2, String.format("%02d:%02d", h, m + 2), 3, String.format("%02d:%02d", h, m + 3));
-                            addPathInBus(busModel, 3, String.format("%02d:%02d", h, m + 3), 4, String.format("%02d:%02d", h, m + 4));
-                            addPathInBus(busModel, 4, String.format("%02d:%02d", h, m + 4), 5, String.format("%02d:%02d", h, m + 6));
-                            addPathInBus(busModel, 5, String.format("%02d:%02d", h, m + 6), 6, String.format("%02d:%02d", h, m + 7));
-                            addPathInBus(busModel, 6, String.format("%02d:%02d", h, m + 7), 7, String.format("%02d:%02d", h, m + 8));
-                            addPathInBus(busModel, 7, String.format("%02d:%02d", h, m + 8), 8, String.format("%02d:%02d", h, m + 9));
-                            addPathInBus(busModel, 8, String.format("%02d:%02d", h, m + 9), 9, String.format("%02d:%02d", h, m + 11));
-                            buses.add(busModel);
-                        }
-                    }
-                }
+                for (int m = 30; m <= 3 * 60 + 45; m += 15)
+                    buses.add(createBus(8, m, new int[]{0, 1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
+                for (int m = 0; m <= 4 * 60; m += 15)
+                    buses.add(createBus(13, m, new int[]{0, 1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
                 break;
 
             case R.string.tab_kaist_wolpyeong:
                 for (int h = 9; h <= 17; h++) {
                     if (h != 12) {
-                        BusModel busModel = new BusModel();
-                        addPathInBus(busModel, 0, String.format("%02d:%02d", h, 0), 1, String.format("%02d:%02d", h, 2));
-                        addPathInBus(busModel, 1, String.format("%02d:%02d", h, 2), 2, String.format("%02d:%02d", h, 4));
-                        addPathInBus(busModel, 2, String.format("%02d:%02d", h, 4), 3, String.format("%02d:%02d", h, 10));
-                        addPathInBus(busModel, 3, String.format("%02d:%02d", h, 10), 4, String.format("%02d:%02d", h, 15));
-                        addPathInBus(busModel, 4, String.format("%02d:%02d", h, 15), 5, String.format("%02d:%02d", h, 25));
-                        addPathInBus(busModel, 5, String.format("%02d:%02d", h, 25), 6, String.format("%02d:%02d", h, 32));
-                        addPathInBus(busModel, 6, String.format("%02d:%02d", h, 32), 7, String.format("%02d:%02d", h, 40));
-                        addPathInBus(busModel, 7, String.format("%02d:%02d", h, 40), 8, String.format("%02d:%02d", h, 43));
-                        addPathInBus(busModel, 8, String.format("%02d:%02d", h, 43), 9, String.format("%02d:%02d", h, 44));
-                        addPathInBus(busModel, 9, String.format("%02d:%02d", h, 44), 10, String.format("%02d:%02d", h, 45));
-                        buses.add(busModel);
+                        buses.add(createBus(h, 0, new int[]{0, 2, 4, 10, 15, 25, 32, 40, 43, 44, 45}, 0));
                     }
                 }
                 break;
 
             case R.string.tab_kaist_sunhwan:
-                ArrayList<String> times_str;
-                int[] hs = {7, 8};
-                for (int h : hs) {
-                    times_str = new ArrayList<>();
-                    times_str.add(String.format("%02d:10", h));
-                    times_str.add(String.format("%02d:20", h));
-                    times_str.add(String.format("%02d:30", h));
-                    times_str.add(String.format("%02d:34", h));
-                    times_str.add(String.format("%02d:50", h));
-                    times_str.add(String.format("%02d:05", h + 1));
-                    times_str.add(String.format("%02d:10", h + 1));
-                    buses.add(createBus(times_str, 0));
-                }
-                for (int h = 7; h < 9; h++) {
-                    times_str = new ArrayList<String>();
-                    times_str.add(String.format("%02d:40", h));
-                    times_str.add(String.format("%02d:50", h));
-                    times_str.add(String.format("%02d:00", h + 1));
-                    times_str.add(String.format("%02d:04", h + 1));
-                    times_str.add(String.format("%02d:20", h + 1));
-                    times_str.add(String.format("%02d:35", h + 1));
-                    times_str.add(String.format("%02d:40", h + 1));
-                    buses.add(createBus(times_str, 0));
-                }
-                for (int h = 9; h < 19; h++) {
-                    if ((h < 11) || (h > 15)) {
-                        times_str = new ArrayList<String>();
-                        times_str.add(String.format("%02d:50", h));
-                        times_str.add(String.format("%02d:00", h + 1));
-                        times_str.add(String.format("%02d:10", h + 1));
-                        times_str.add(String.format("%02d:14", h + 1));
-                        times_str.add(String.format("%02d:30", h + 1));
-                        times_str.add(String.format("%02d:45", h + 1));
-                        times_str.add(String.format("%02d:50", h + 1));
-                        buses.add(createBus(times_str, 0));
-                    }
-                }
-                for (int h = 9; h < 27; h++) {
-                    if ((h < 11) || (h > 12)) {
-                        times_str = new ArrayList<String>();
-                        times_str.add(String.format("%02d:20", h));
-                        times_str.add(String.format("%02d:30", h));
-                        times_str.add(String.format("%02d:40", h));
-                        times_str.add(String.format("%02d:44", h));
-                        times_str.add(String.format("%02d:00", h + 1));
-                        times_str.add(String.format("%02d:15", h + 1));
-                        times_str.add(String.format("%02d:20", h + 1));
-                        buses.add(createBus(times_str, 0));
-                    }
-                }
-                int[] hs_2 = {11, 27};
-                for (int h : hs_2) {
-                    times_str = new ArrayList<String>();
-                    times_str.add(String.format("%02d:20", h));
-                    times_str.add(String.format("%02d:30", h));
-                    times_str.add(String.format("%02d:40", h));
-                    buses.add(createBus(times_str, 0));
+                buses.add(createBus(7, 10, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(7, 40, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(8, 10, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(8, 40, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(9, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(9, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(10, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(10, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(11, 20, new int[]{0, 10, 20}, 0));
+                buses.add(createBus(11, 50, new int[]{0, 10, 20, 24, 30}, 0));
+
+                buses.add(createBus(13, 0, new int[]{0, 15, 20}, 4));
+
+                for (int h = 13; h < 27; h++) {
+                    buses.add(createBus(h, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
                 }
 
-                //
-                times_str = new ArrayList<String>();
-                times_str.add("11:50");
-                times_str.add("12:00");
-                times_str.add("12:10");
-                times_str.add("12:14");
-                times_str.add("12:30");
-                buses.add(createBus(times_str, 0));
+                buses.add(createBus(16, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(17, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(18, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(19, 50, new int[]{0, 10, 20}, 0));
+                buses.add(createBus(21, 10, new int[]{0, 4, 20, 35, 40}, 2));
+                buses.add(createBus(21, 50, new int[]{0, 10, 20}, 0));
 
-                //
-                int[] hs_3 = {19, 21};
-                for (int h : hs_3) {
-                    times_str = new ArrayList<String>();
-                    times_str.add(String.format("%02d:50", h));
-                    times_str.add(String.format("%02d:00", h + 1));
-                    times_str.add(String.format("%02d:10", h + 1));
-                    buses.add(createBus(times_str, 0));
-                }
+                buses.add(createBus(27, 20, new int[]{0, 10, 20}, 0));
 
-                //
-                times_str = new ArrayList<String>();
-                times_str.add("13:00");
-                times_str.add("13:15");
-                times_str.add("13:20");
-                buses.add(createBus(times_str, 4));
-
-                //
-                times_str = new ArrayList<String>();
-                times_str.add("21:10");
-                times_str.add("21:14");
-                times_str.add("21:30");
-                times_str.add("21:45");
-                times_str.add("21:50");
-                buses.add(createBus(times_str, 2));
                 break;
 
         }
@@ -628,7 +511,7 @@ public class BusApi extends ApiBase {
         Collections.sort(buses, new Comparator<BusModel>() {
             @Override
             public int compare(BusModel lhs, BusModel rhs) {
-                return lhs.getDepartureTime(0).getAbsoluteSecond() > rhs.getDepartureTime(0).getAbsoluteSecond() ? 1 : -1;
+                return lhs.getDepartureTime(0).getAbsoluteSeconds() > rhs.getDepartureTime(0).getAbsoluteSeconds() ? 1 : -1;
             }
         });
 
@@ -636,36 +519,31 @@ public class BusApi extends ApiBase {
             Collections.sort(busStationModel.departureTimes, new Comparator<BusTimeModel>() {
                 @Override
                 public int compare(BusTimeModel lhs, BusTimeModel rhs) {
-                    return lhs.getAbsoluteSecond() - rhs.getAbsoluteSecond();
+                    return lhs.getAbsoluteSeconds() - rhs.getAbsoluteSeconds();
                 }
             });
         }
     }
 
-    private BusModel createBus(ArrayList<String> times_str, int offset) {
+    private BusModel createBus(int baseHours, int baseMinutes, int deltaMinutes[], int offset) {
         BusModel busModel = new BusModel();
-        for (int i = 0; i < (times_str.size() - 1); i++) {
-            addPathInBus(busModel, i + offset, times_str.get(i), (i + 1 + offset) % busStationModels.size(), times_str.get(i + 1));
+        for (int i = 0; i < deltaMinutes.length - 1; i++) {
+            addPathInBus(busModel, i + offset, baseHours, baseMinutes + deltaMinutes[i], (i + 1 + offset) % busStationModels.size(), baseHours, baseMinutes + deltaMinutes[i + 1]);
         }
         return busModel;
     }
 
-    /**
-     * @param busModel
-     * @param departureStationIndex
-     * @param departureTime
-     * @param arrivalStationIndex
-     * @param arrivalTime
-     */
-    private void addPathInBus(BusModel busModel, int departureStationIndex, String departureTime, int arrivalStationIndex, String arrivalTime) {
-
+    private void addPathInBus(BusModel busModel,
+                              int departureStationIndex, int departureTimeHours, int departureTimeMinutes,
+                              int arrivalStationIndex, int arrivalTimeHours, int arrivalTimeMinutes) {
         BusTimeModel busDepartureTime = new BusTimeModel();
-        busDepartureTime.setTime(departureTime);
+        busDepartureTime.setTime(departureTimeHours, departureTimeMinutes, 0);
 
         BusTimeModel busArrivalTime = new BusTimeModel();
-        busArrivalTime.setTime(arrivalTime);
+        busArrivalTime.setTime(arrivalTimeHours, arrivalTimeMinutes, 0);
 
         busModel.addPath(busStationModels.get(departureStationIndex), busDepartureTime, busStationModels.get(arrivalStationIndex), busArrivalTime);
+
     }
 
     /**
