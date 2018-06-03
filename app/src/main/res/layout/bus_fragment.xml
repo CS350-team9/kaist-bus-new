@@ -9,22 +9,10 @@
     sothree:umanoShadowHeight="4dp">
 
     <!-- MAIN CONTENT -->
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_marginBottom="48dp" />
-
-        <Switch
-            android:id="@+id/toggle_google_map_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:text="Switch" />
 
         <kr.ac.kaist.kyotong.ui.CircularBusRouteMapView
             android:id="@+id/circular_bus_route_view"
@@ -36,7 +24,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-    </LinearLayout>
+        <Switch
+            android:id="@+id/toggle_google_map_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="Switch" />
+
+    </FrameLayout>
 
 
     <!-- SLIDING LAYOUT -->
