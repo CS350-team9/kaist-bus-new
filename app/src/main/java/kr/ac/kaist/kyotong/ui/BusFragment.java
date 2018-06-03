@@ -29,6 +29,7 @@ import android.widget.TextView;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -710,31 +711,64 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        BusApi busApi = new BusApi(R.string.tab_kaist_olev);
+        BusApi busApi = new BusApi(R.string.tab_kaist_wolpyeong);
 
         ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
 
-        for (BusStationModel bm : busStationModels) {
+        int padding = -5;
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        for (int i = 0; i < busStationModels.size(); i++) {
+            BusStationModel bm = busStationModels.get(i);
             // marker at stations;
             Location loc = bm.location;
             LatLng thisStation = new LatLng(loc.getLatitude(), loc.getLongitude());
+            builder.include(thisStation);
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(thisStation);
             markerOptions.title(bm.name);
             googleMap.addMarker(markerOptions);
 
             // polyline at path
-            ArrayList<LocationCoordinates> pointsOnPathToNextStation = bm.pointsOnPathToNextStation;
-            for (LocationCoordinates path : pointsOnPathToNextStation) {
-                Polyline line = googleMap.addPolyline(new PolylineOptions()
-                    .add(thisStation, new LatLng(path.latitude, path.longitude))
-                    .width(5)
-                    .color(Color.WHITE));
-            }
-        }
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(busStationModels.get(0).location.getLatitude(), busStationModels.get(0).location.getLongitude())));
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+            ArrayList<LatLng> pointsOnPathToNextStation = locationCoordToLatLng(bm.pointsOnPathToNextStation);
 
+            pointsOnPathToNextStation.add(0, thisStation);
+            if (i < busStationModels.size() - 1) {
+                pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(busStationModels.get(i+1).location.getLatitude(),
+                        busStationModels.get(i+1).location.getLongitude()));
+            }
+            PolylineOptions polylineOptions = new PolylineOptions();
+            polylineOptions.color(Color.RED);
+            polylineOptions.width(10);
+            polylineOptions.addAll(pointsOnPathToNextStation);
+            googleMap.addPolyline(polylineOptions);
+
+        }
+
+        LatLngBounds bounds = builder.build();
+        final CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(busStationModels.get(0).location.getLatitude(), busStationModels.get(0).location.getLongitude())));
+//        googleMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+
+        googleMap.animateCamera(cu);
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                Log.d(TAG, "onMarkerClick");
+                return true;
+            }
+        });
+
+    }
+
+    public ArrayList<LatLng> locationCoordToLatLng(ArrayList<LocationCoordinates> pointsOnPathToNextStation) {
+        ArrayList<LatLng> res = new ArrayList<>();
+        for (LocationCoordinates lc : pointsOnPathToNextStation) {
+            res.add(new LatLng(lc.latitude, lc.longitude));
+        }
+        return res;
     }
 }
 

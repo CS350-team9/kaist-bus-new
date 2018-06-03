@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.graphics.Typeface;
+import android.util.Log;
 
 import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.BusStationModel;
@@ -70,10 +71,10 @@ public class CircularBusRouteMapView extends ConstraintLayout {
      */
     public void updateStations(ArrayList<BusStationModel> stations) {
         if (centerCircle == null) {
-            android.util.Log.w("updateStations", "missing centerCircle");
+            Log.w("updateStations", "missing centerCircle");
             centerCircle = findViewById(R.id.circular_bus_route_circle);
             if (centerCircle == null) {
-                android.util.Log.w("updateStations", "cannot retrieve centerCircle");
+                Log.w("updateStations", "cannot retrieve centerCircle");
                 return;
             }
         }
@@ -108,15 +109,22 @@ public class CircularBusRouteMapView extends ConstraintLayout {
             View.OnClickListener iconClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    System.out.println("clicked!");
                     for (View stationIcon : stationIcons)
                         stationIcon.setBackgroundResource(R.drawable.bus_fragment_station);
                     stationIcons.get(stationIndex).setBackgroundResource(R.drawable.bus_fragment_station_selected);
+
+                    System.out.println("clicked!2");
 
                     for (TextView stationNameView : stationNameViews)
                         stationNameView.setTypeface(null, Typeface.NORMAL);
                     stationNameViews.get(stationIndex).setTypeface(null, Typeface.BOLD);
 
+                    System.out.println("clicked!3");
+
                     listener.onStationClick(stationIndex);
+
+                    System.out.println("clicked!4");
                 }
             };
             stationIcons.get(i).setOnClickListener(iconClickListener);
@@ -146,10 +154,10 @@ public class CircularBusRouteMapView extends ConstraintLayout {
      */
     public void updateBuses(ArrayList<BusModel> buses, int hours, int minutes, int seconds) {
         if (centerCircle == null) {
-            android.util.Log.w("updateBuses", "missing centerCircle");
+            Log.w("updateBuses", "missing centerCircle");
             centerCircle = findViewById(R.id.circular_bus_route_circle);
             if (centerCircle == null) {
-                android.util.Log.w("updateBuses", "cannot retrieve centerCircle");
+                Log.w("updateBuses", "cannot retrieve centerCircle");
                 return;
             }
         }
