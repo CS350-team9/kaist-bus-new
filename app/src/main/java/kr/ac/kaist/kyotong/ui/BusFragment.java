@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.TypedValue;
@@ -41,10 +42,15 @@ import kr.ac.kaist.kyotong.utils.SizeUtils;
 import kr.ac.kaist.kyotong.api.BusApi;
 import kr.ac.kaist.kyotong.utils.MapManager;
 
+//TODO Google Map 관련 코드를 Custom View 클래스에 몰아넣기
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+
 /**
  * 메인 화면의 버스 노선 탭에 대응하는 노선도를 표시하는 Fragment
  */
-public class BusFragment extends Fragment {
+public class BusFragment extends Fragment implements OnMapReadyCallback {
 
     /**
      * The fragment argument representing the section number for this
@@ -108,6 +114,9 @@ public class BusFragment extends Fragment {
     private View mErrorView;
     private TextView mErrorTv;
     private ProgressBar mErrorPb;
+
+    //TODO Google Map 관련 코드
+    private MapView mapView = null;
 
 
     /**
@@ -234,6 +243,10 @@ public class BusFragment extends Fragment {
 //                openBab();
 //            }
 //        });
+
+        mapView = (MapView) rootView.findViewById(R.id.mapView);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
 
         /**
          *
@@ -788,9 +801,50 @@ public class BusFragment extends Fragment {
             mBusTimerTask = null;
         }
 
+        mapView.onDestroy();
         super.onDestroy();
-
     }
 
+
+    //MapView를 사용하기 위해 필요함
+    @Override
+    public void onStart() {
+        super.onStart();
+        mapView.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        mapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        mapView.onStop();
+        super.onStop();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onLowMemory() {
+        mapView.onLowMemory();
+        super.onLowMemory();
+    }
+
+    public void onMapReady(GoogleMap googleMap) {
+
+    }
 }
 
