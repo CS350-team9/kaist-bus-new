@@ -19,49 +19,10 @@
             android:layout_height="?attr/actionBarSize"
             android:layout_marginBottom="48dp" />
 
-        <FrameLayout
-            android:id="@+id/main_layout"
+        <kr.ac.kaist.kyotong.ui.CircularBusRouteMapView
+            android:id="@+id/circular_bus_route_view"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/circle_iv"
-                android:layout_width="170dp"
-                android:layout_height="170dp"
-                android:layout_gravity="center"
-                android:scaleType="fitCenter"
-                android:src="@drawable/bus_fragment_circle" />
-
-            <View
-                android:id="@+id/bus_view_0"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="84dp"
-                android:background="@drawable/bus_fragment_bus"
-                android:visibility="gone" />
-
-            <View
-                android:id="@+id/bus_view_1"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="84dp"
-                android:background="@drawable/bus_fragment_bus"
-                android:visibility="gone" />
-
-            <View
-                android:id="@+id/bus_view_2"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="84dp"
-                android:background="@drawable/bus_fragment_bus"
-                android:visibility="gone" />
-
-        </FrameLayout>
+            android:layout_height="match_parent" />
 
         <com.google.android.gms.maps.MapView
             android:id="@+id/mapView"

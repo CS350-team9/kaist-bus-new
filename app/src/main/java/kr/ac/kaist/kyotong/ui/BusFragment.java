@@ -44,11 +44,12 @@ import java.util.TimerTask;
 
 import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.BusModel;
-
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.LocationCoordinates;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
+
+import kr.ac.kaist.kyotong.ui.CircularBusRouteMapView;
 
 import kr.ac.kaist.kyotong.api.BusApi;
 import kr.ac.kaist.kyotong.utils.MapManager;
@@ -109,16 +110,14 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
      *
      */
     private View mShadowView;
-    private ImageView mCircleIv;
     private SlidingUpPanelLayout mLayout;
     private ImageButton mStationMapBtn;
     private ImageButton mStationImgBtn;
     private TextView mNameTv;
     private FrameLayout mMainLayout;
-    /** 원형 버스 노선도 위에서 움직이는 버스를 나타내는 아이콘의 View */
-    private View[] mBusView = new View[3];
-    private ArrayList<TextView> mStationTvs = new ArrayList<TextView>();
-    private ArrayList<View> mStationViews = new ArrayList<View>();
+
+    /** Custom View */
+    CircularBusRouteMapView circularBusRouteMapView;
     private ListView mLv;
     private LvAdapter mLvAdapter;
 
@@ -173,11 +172,7 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
          */
         mLayout = (SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout);
 
-        mMainLayout = (FrameLayout) rootView.findViewById(R.id.main_layout);
-        mCircleIv = (ImageView) rootView.findViewById(R.id.circle_iv);
-        mBusView[0] = rootView.findViewById(R.id.bus_view_0);
-        mBusView[1] = rootView.findViewById(R.id.bus_view_1);
-        mBusView[2] = rootView.findViewById(R.id.bus_view_2);
+        circularBusRouteMapView = rootView.findViewById(R.id.circular_bus_route_view);
 
         mStationMapBtn = (ImageButton) rootView.findViewById(R.id.station_map_btn);
         mStationImgBtn = (ImageButton) rootView.findViewById(R.id.station_img_btn);
@@ -194,16 +189,6 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
          */
         mLv.addHeaderView(headerView);
         mLv.addFooterView(footerView);
-
-        /**
-         *
-         */
-        initBus();
-
-        /**
-         *
-         */
-        mMainLayout.setLayoutParams(new LinearLayout.LayoutParams(mContentWidth, mContentHeight));
 
         /**
          *
@@ -335,10 +320,13 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
             busStationModels.addAll((ArrayList<BusStationModel>) maps.get("busStations"));
             buses.addAll((ArrayList<BusModel>) maps.get("buses"));
 
-            /**
-             *
-             */
-            initStations(busStationModels);
+            circularBusRouteMapView.setOnStationClickListener(new CircularBusRouteMapView.OnStationClickListener() {
+                @Override
+                public void onStationClick(int stationIndex) {
+                    updateStation(stationIndex);
+                }
+            });
+            circularBusRouteMapView.updateStations(busStationModels);
 
             updateStation(0);
 
@@ -360,109 +348,8 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
     }
 
     /**
-     *
-     */
-    private void initBus() {
-
-        int busViewRadius = (int) (((float) mContentHeight) * 0.02f);
-        int circleRadius = (int) (((float) mContentHeight) * 0.20f);
-
-        FrameLayout.LayoutParams params;
-        params = new FrameLayout.LayoutParams(circleRadius * 2, circleRadius * 2);
-        params.gravity = Gravity.CENTER;
-        mCircleIv.setLayoutParams(params);
-
-        for (int i = 0; i < 3; i++) {
-            mBusView[i].setPivotX(busViewRadius);
-            mBusView[i].setPivotY(busViewRadius + circleRadius);
-            params = new FrameLayout.LayoutParams(busViewRadius * 2, busViewRadius * 2);
-            params.gravity = Gravity.CENTER;
-            params.bottomMargin = circleRadius;
-            mBusView[i].setLayoutParams(params);
-        }
-    }
-
-    /**
-     * @param busStationModels
-     */
-    private void initStations(ArrayList<BusStationModel> busStationModels) {
-
-        FrameLayout.LayoutParams params;
-        int station_tv_padding = (int) ((((float) mContentHeight) * 0.05f));
-        float station_tv_radius_x = ((float) mContentHeight) * 0.45f;
-        float station_tv_radius_y = ((float) mContentHeight) * 0.37f;
-        int station_radius = (int) (((float) mContentHeight) * 0.06f);
-        float station_view_radius = ((float) mContentHeight) * 0.27f;
-
-        for (int i = 0; i < (busStationModels.size() - 1); i++) {
-
-            /**
-             *
-             */
-            final int index = i;
-            BusStationModel busStationModel = busStationModels.get(i);
-
-            /**
-             *
-             */
-            TextView stationTv = new TextView(getActivity());
-            params = new FrameLayout.LayoutParams(-2, -2);
-            params.gravity = Gravity.CENTER;
-            params.leftMargin = (int) (station_tv_radius_x * Math.sin(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            params.bottomMargin = (int) (station_tv_radius_y * Math.cos(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            stationTv.setPadding(station_tv_padding, station_tv_padding, station_tv_padding, station_tv_padding);
-            stationTv.setLayoutParams(params);
-            stationTv.setText(busStationModel.name);
-            stationTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, station_radius);
-            stationTv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    updateStation(index);
-                }
-            });
-            mMainLayout.addView(stationTv, 2);
-            mStationTvs.add(stationTv);
-
-            /**
-             *
-             */
-            View stationView = new View(getActivity());
-            params = new FrameLayout.LayoutParams(station_radius, station_radius);
-            params.gravity = Gravity.CENTER;
-            params.leftMargin = (int) (station_view_radius * Math.sin(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            params.bottomMargin = (int) (station_view_radius * Math.cos(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            stationView.setLayoutParams(params);
-            stationView.setBackgroundResource(R.drawable.bus_fragment_station);
-            stationView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    updateStation(index);
-                }
-            });
-            mMainLayout.addView(stationView, 2);
-            mStationViews.add(stationView);
-
-            /**
-             *
-             */
-            View stationBtn = new View(getActivity());
-            params = new FrameLayout.LayoutParams(station_radius * 5 / 2, station_radius * 5 / 2);
-            params.gravity = Gravity.CENTER;
-            params.leftMargin = (int) (station_view_radius * Math.sin(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            params.bottomMargin = (int) (station_view_radius * Math.cos(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            stationBtn.setLayoutParams(params);
-            stationBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    updateStation(index);
-                }
-            });
-            mMainLayout.addView(stationBtn, 2);
-        }
-    }
-
-    /**
-     * @param index
+     * index에 해당하는 정거장이 클릭되었을 때 UI를 업데이트한다.
+     * @param index 클릭한 정거장을 나타내는 숫자 (0부터 시작)
      */
     private void updateStation(int index) {
 
@@ -519,22 +406,6 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
             mStationImgBtn.setVisibility(View.GONE);
         }
 
-        /**
-         *
-         */
-        for (View stationView : mStationViews) {
-            stationView.setBackgroundResource(R.drawable.bus_fragment_station);
-        }
-        mStationViews.get(index).setBackgroundResource(R.drawable.bus_fragment_station_selected);
-
-        for (TextView stationTv : mStationTvs) {
-            stationTv.setTypeface(null, Typeface.NORMAL);
-        }
-        mStationTvs.get(index).setTypeface(null, Typeface.BOLD);
-
-        /**
-         *
-         */
         mUpdateStationRunning = false;
 
     }
@@ -577,7 +448,8 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 
                 handler.post(new Runnable() {
                                  public void run() {
-                                     setCurrentBusLocations(getCurrentBusLocations());
+                                     circularBusRouteMapView.updateBuses(buses, current_hour, current_minute, current_second);
+
                                      mLvAdapter.notifyDataSetChanged();
                                      if (mShowErrorView && !mUpdateStationRunning && mBusApiTask == null) {
 
@@ -598,43 +470,6 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-
-    /**
-     * 현재 운행 중인 버스의 위치를 나타낸 각도의 배열을 돌려준다.
-     * @return 버스의 위치를 나타낸 각도의 배열
-     */
-    private int[] getCurrentBusLocations() {
-
-        int[] locations = {-1, -1, -1};
-        int cur = 0;
-        for (BusModel busModel : buses) {
-            int location = busModel.getLocation(current_hour, current_minute, current_second);
-            if (location != -1) {
-                locations[cur] = location;
-                cur++;
-            }
-        }
-
-        return locations;
-    }
-
-    /**
-     * 주어진 각도를 바탕으로 각 버스 아이콘의 표시 여부 및 위치를 변경한다.
-     * @param locations 각 버스 아이콘의 각도를 나타낸 배열 (-1일 경우 버스 아이콘 숨김)
-     */
-    private void setCurrentBusLocations(int[] locations) {
-
-        for (int i = 0; i < 3; i++) {
-
-            if (locations[i] == -1) {
-                mBusView[i].setVisibility(View.GONE);
-            } else {
-                mBusView[i].setVisibility(View.VISIBLE);
-                mBusView[i].setRotation(locations[i]);
             }
         }
     }
