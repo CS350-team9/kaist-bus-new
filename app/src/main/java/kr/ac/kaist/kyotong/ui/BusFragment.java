@@ -3,25 +3,18 @@ package kr.ac.kaist.kyotong.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -32,11 +25,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -49,8 +40,6 @@ import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.LocationCoordinates;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
-
-import kr.ac.kaist.kyotong.ui.CircularBusRouteMapView;
 
 import kr.ac.kaist.kyotong.api.BusApi;
 import kr.ac.kaist.kyotong.utils.MapManager;
@@ -66,7 +55,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 /**
  * 메인 화면의 버스 노선 탭에 대응하는 노선도를 표시하는 Fragment
  */
-public class BusFragment extends Fragment implements OnMapReadyCallback {
+public class BusFragment extends Fragment {
 
     /**
      * The fragment argument representing the section number for this
@@ -132,6 +121,7 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 
     //TODO Google Map 관련 코드
     private MapView mapView = null;
+    private GoogleMap googleMap = null;
 
 
     /**
@@ -261,8 +251,15 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 //        });
 
         mapView = rootView.findViewById(R.id.mapView);
+        mapView.setVisibility(View.INVISIBLE);
         mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this);
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                BusFragment.this.googleMap = googleMap;
+                initializeGoogleMap();
+            }
+        });
 
         /**
          *
@@ -709,8 +706,7 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
         super.onLowMemory();
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void initializeGoogleMap() {
         BusApi busApi = new BusApi(R.string.tab_kaist_wolpyeong);
 
         ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
