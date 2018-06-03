@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    buildToolsVersion '26.0.2'
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "kr.ac.kaist.kyotong"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 25
         versionCode 4
         versionName "0.9.0.4"
@@ -16,6 +16,11 @@ android {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            applicationIdSuffix ".debug"
+        }
+    }
+    productFlavors {
     }
 }
 
@@ -43,4 +48,18 @@ dependencies {
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
     compile 'com.sothree.slidinguppanel:library:3.3.0'
     compile 'asia.ivity.android:drag-sort-listview:1.0'
+//    apt 'com.google.auto.value:auto-value:1.2'
+//    testCompile 'junit:junit:4.12'
+//    testCompile 'org.mockito:mockito-core:1.10.19'
+//    provided 'com.google.auto.value:auto-value:1.2'
+//    compile 'com.android.support:gridlayout-v7:25.1.0'
+//    compile 'com.android.support:recyclerview-v7:25.1.0'
+//    compile 'com.android.support:design:25.1.0'
+//    compile 'com.jakewharton:butterknife:7.0.1'
+//    compile('com.philliphsu:bottomsheetpickers:2.3.2') {
+//        exclude group: 'com.android.support', module: 'appcompat-v7'
+//        exclude group: 'com.android.support', module: 'design'
+//        exclude group: 'com.android.support', module: 'gridlayout-v7'
+//    }
+
 }
