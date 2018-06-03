@@ -29,6 +29,7 @@ import kr.ac.kaist.kyotong.utils.EmailManager;
 import kr.ac.kaist.kyotong.utils.MainActivityDialogManager;
 import kr.ac.kaist.kyotong.utils.SmsManager;
 import kr.ac.kaist.kyotong.utils.prefs.PopupPreference;
+import kr.ac.kaist.kyotong.utils.AlarmManager;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -245,7 +246,11 @@ public class MainActivity extends ActivityBase {
             sm.showDialog();
         } else if (id == R.id.action_change) {
             ShuttleActivity.startActivity(this);
+        } else if (id == R.id.action_alarm){
+            AlarmManager am = new AlarmManager(MainActivity.this, "joonyoung@bablabs.com", "[셔틀즈] " + mTitle + "편에 할말 있다!", "어떤 의견이 있으신가요? 시원하게 말씀해보세요!");
+            am.startIntent();
         }
+
         return super.onOptionsItemSelected(item);
     }
 

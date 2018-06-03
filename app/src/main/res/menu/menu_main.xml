@@ -3,9 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <item
+        android:id="@+id/action_alarm"
+        android:icon="@drawable/ic_alarm"
+        android:orderInCategory="2"
+        android:title="알람"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_info"
         android:icon="@drawable/ic_info"
-        android:orderInCategory="1"
+        android:orderInCategory="3"
         android:title="정보"
         app:showAsAction="always" />
 
