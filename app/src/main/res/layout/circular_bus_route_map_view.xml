@@ -1,0 +1,57 @@
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/test_id">
+<!--
+    <kr.ac.kaist.kyotong.ui.CircularBusRouteMapView
+        android:id="@+id/circularBusRouteMapView"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:background="#ccc"
+        android:paddingBottom="40dp"
+        android:paddingLeft="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:exampleColor="#33b5e5"
+        app:exampleDimension="24sp"
+        app:exampleDrawable="@android:drawable/ic_menu_add"
+        app:exampleString="Hello, CircularBusRouteMapView" /> -->
+
+    <ImageView
+        android:id="@+id/circular_bus_route_circle"
+        android:layout_width="170dp"
+        android:layout_height="170dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/bus_fragment_circle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <!--<View-->
+        <!--android:id="@+id/circular_bus_icon"-->
+        <!--android:layout_width="10dp"-->
+        <!--android:layout_height="10dp"-->
+        <!--android:background="@drawable/bus_fragment_bus"-->
+        <!--app:layout_constraintCircle="@+id/circular_bus_route_circle"-->
+        <!--app:layout_constraintCircleRadius="85dp" />-->
+
+    <!--<View-->
+        <!--android:id="@+id/circular_station_icon"-->
+        <!--android:layout_width="15dp"-->
+        <!--android:layout_height="15dp"-->
+        <!--android:background="@drawable/bus_fragment_station_selected"-->
+        <!--app:layout_constraintCircle="@+id/circular_bus_route_circle"-->
+        <!--app:layout_constraintCircleRadius="110dp" />-->
+
+    <!--<TextView-->
+        <!--android:id="@+id/circular_station_name"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="station name"-->
+        <!--app:layout_constraintCircle="@+id/circular_bus_route_circle"-->
+        <!--app:layout_constraintCircleRadius="150dp" />-->
+
+</android.support.constraint.ConstraintLayout>

@@ -44,4 +44,5 @@ dependencies {
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
     compile 'com.sothree.slidinguppanel:library:3.3.0'
     compile 'asia.ivity.android:drag-sort-listview:1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
 }
