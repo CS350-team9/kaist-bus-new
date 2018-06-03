@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.graphics.Typeface;
 
 import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.BusStationModel;
@@ -78,7 +79,7 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         }
 
         int mainContentHeight = SizeUtils.getMainContentHeight(getContext());
-        int stationIconRadius = (int) (((float) mainContentHeight) * 0.06f);
+        final int stationIconRadius = (int) (((float) mainContentHeight) * 0.06f);
 
         while (stationIcons.size() < stations.size()) {
             View stationIcon = new View(getContext());
@@ -110,6 +111,10 @@ public class CircularBusRouteMapView extends ConstraintLayout {
                     for (View stationIcon : stationIcons)
                         stationIcon.setBackgroundResource(R.drawable.bus_fragment_station);
                     stationIcons.get(stationIndex).setBackgroundResource(R.drawable.bus_fragment_station_selected);
+
+                    for (TextView stationNameView : stationNameViews)
+                        stationNameView.setTypeface(null, Typeface.NORMAL);
+                    stationNameViews.get(stationIndex).setTypeface(null, Typeface.BOLD);
 
                     listener.onStationClick(stationIndex);
                 }
