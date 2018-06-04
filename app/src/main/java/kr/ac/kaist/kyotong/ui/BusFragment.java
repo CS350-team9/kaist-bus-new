@@ -3,7 +3,6 @@ package kr.ac.kaist.kyotong.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -702,8 +701,8 @@ public class BusFragment extends Fragment {
         for (int i = 0; i < busStationModels.size(); i++) {
             BusStationModel bm = busStationModels.get(i);
             // marker at stations;
-            Location loc = bm.location;
-            LatLng thisStation = new LatLng(loc.getLatitude(), loc.getLongitude());
+            LatLng loc = bm.location;
+            LatLng thisStation = new LatLng(loc.latitude, loc.longitude);
             builder.include(thisStation);
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(thisStation);
@@ -711,12 +710,12 @@ public class BusFragment extends Fragment {
             googleMap.addMarker(markerOptions);
 
             // polyline at path
-            ArrayList<LatLng> pointsOnPathToNextStation = locationCoordToLatLng(bm.pointsOnPathToNextStation);
+            ArrayList<LatLng> pointsOnPathToNextStation = (ArrayList<LatLng>) bm.pointsOnPathToNextStation.clone();
 
             pointsOnPathToNextStation.add(0, thisStation);
             if (i < busStationModels.size() - 1) {
-                pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(busStationModels.get(i+1).location.getLatitude(),
-                        busStationModels.get(i+1).location.getLongitude()));
+                pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(busStationModels.get(i+1).location.latitude,
+                        busStationModels.get(i+1).location.longitude));
             }
             PolylineOptions polylineOptions = new PolylineOptions();
             polylineOptions.color(Color.RED);
@@ -742,14 +741,6 @@ public class BusFragment extends Fragment {
             }
         });
 
-    }
-
-    public ArrayList<LatLng> locationCoordToLatLng(ArrayList<LocationCoordinates> pointsOnPathToNextStation) {
-        ArrayList<LatLng> res = new ArrayList<>();
-        for (LocationCoordinates lc : pointsOnPathToNextStation) {
-            res.add(new LatLng(lc.latitude, lc.longitude));
-        }
-        return res;
     }
 }
 

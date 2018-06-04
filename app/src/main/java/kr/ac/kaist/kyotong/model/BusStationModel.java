@@ -1,10 +1,8 @@
 package kr.ac.kaist.kyotong.model;
 
-import android.location.Location;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-
-import kr.ac.kaist.kyotong.utils.LocationCoordinates;
 
 /**
  * Created by yearnning on 14. 12. 20..
@@ -18,7 +16,7 @@ public class BusStationModel {
      * @param degree
      * @return
      */
-    public static BusStationModel newInstance(String name_full, int degree, Location location) {
+    public static BusStationModel newInstance(String name_full, int degree, LatLng location) {
         BusStationModel busStationModel = new BusStationModel();
         busStationModel.name_full = name_full;
         if (name_full.contains("(") && name_full.contains(")")) {
@@ -31,23 +29,16 @@ public class BusStationModel {
         return busStationModel;
     }
 
-    public static BusStationModel newInstance(String name_full, int degree, Location location, int img_resource) {
+    public static BusStationModel newInstance(String name_full, int degree, LatLng location, int img_resource) {
         BusStationModel busStationModel = BusStationModel.newInstance(name_full, degree, location);
         busStationModel.img_resource = img_resource;
         return busStationModel;
     }
 
-    public static Location newLocationInstance(double latitude, double longitude) {
-        Location location = new Location("");
-        location.setLatitude(latitude);
-        location.setLongitude(longitude);
-        return location;
-    }
-
     /**
      *
      */
-    public Location location = null;
+    public LatLng location = null;
     public String name = "";
     public String name_full = "";
     /** 원형 버스 노선도에서 정거장을 점으로 표시할 위치를 나타내는 각도(degree) */
@@ -58,7 +49,7 @@ public class BusStationModel {
     public ArrayList<BusTimeModel> departureTimes = new ArrayList<BusTimeModel>();
 
     /** 이 버스 정거장에서 다음 정거장까지의 경로를 구성하는 꼭짓점의 좌표 (두 정거장의 좌표는 포함하지 않음) */
-    public ArrayList<LocationCoordinates> pointsOnPathToNextStation = new ArrayList<>();
+    public ArrayList<LatLng> pointsOnPathToNextStation = new ArrayList<>();
 
     public void addDepartureTime(BusTimeModel busTimeModel) {
         departureTimes.add(busTimeModel);
