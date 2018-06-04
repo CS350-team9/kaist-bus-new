@@ -37,7 +37,6 @@ import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.BusModel;
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
-import kr.ac.kaist.kyotong.utils.LocationCoordinates;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
 
 import kr.ac.kaist.kyotong.api.BusApi;

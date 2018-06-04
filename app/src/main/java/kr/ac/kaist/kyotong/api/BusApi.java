@@ -156,19 +156,15 @@ public class BusApi extends ApiBase {
                         new LatLng(36.370824, 127.364),
                         new LatLng(36.371153, 127.365),
                         new LatLng(36.370993, 127.365),
-
                 },
                 {
-
                         new LatLng(36.369898, 127.366),
                         new LatLng(36.369924, 127.366),
                         new LatLng(36.370773, 127.367),
                         new LatLng(36.370094, 127.369),
                         new LatLng(36.369524, 127.369),
-
                 },
                 {
-
                         new LatLng(36.369375, 127.369),
                         new LatLng(36.369241, 127.369),
                         new LatLng(36.368887, 127.369),
@@ -182,22 +178,16 @@ public class BusApi extends ApiBase {
                         new LatLng(36.367715, 127.367),
                         new LatLng(36.366400, 127.364),
                         new LatLng(36.366391, 127.364),
-
                 },
                 {
-
                         new LatLng(36.366308, 127.363),
                         new LatLng(36.367137, 127.362),
-
                 },
                 {
-
                         new LatLng(36.368792, 127.361),
                         new LatLng(36.369854, 127.360),
-
                 },
                 {
-
                         new LatLng(36.370814, 127.359),
                         new LatLng(36.371258, 127.358),
                         new LatLng(36.371405, 127.358),
@@ -206,7 +196,6 @@ public class BusApi extends ApiBase {
                         new LatLng(36.372489, 127.356),
                         new LatLng(36.372999, 127.356),
                         new LatLng(36.373413, 127.356),
-
                 },
                 {
                         //8 -> 0은 직선 경로여서 중간 점이 필요없음
