@@ -3,6 +3,8 @@ package kr.ac.kaist.kyotong.model;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by yearnning on 14. 12. 20..
@@ -53,5 +55,12 @@ public class BusStationModel {
 
     public void addDepartureTime(BusTimeModel busTimeModel) {
         departureTimes.add(busTimeModel);
+    }
+
+    /**
+     * 보관하고 있는 버스 시간표를 정렬한다.
+     */
+    public void sortBusTimes() {
+        Collections.sort(departureTimes);
     }
 }

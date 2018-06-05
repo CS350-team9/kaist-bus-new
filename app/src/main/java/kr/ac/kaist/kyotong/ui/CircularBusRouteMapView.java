@@ -1,6 +1,7 @@
 package kr.ac.kaist.kyotong.ui;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -163,8 +164,9 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         //현재 운행 중인 버스를 추려낸다
         ArrayList<BusModel> activeBuses     = new ArrayList<>();
         ArrayList<Float>    activeBusAngles = new ArrayList<>();
+        Calendar now = Calendar.getInstance();
         for (BusModel bus : buses) {
-            int busAngle = bus.getAngle(BusTimeModel.getCurrentTime());
+            int busAngle = bus.getAngle(now);
             if (busAngle != -1) {
                 activeBuses.add(bus);
                 activeBusAngles.add(busAngle / 360.0f);

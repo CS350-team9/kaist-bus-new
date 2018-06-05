@@ -1,91 +1,101 @@
 package kr.ac.kaist.kyotong.model;
 
+import android.support.annotation.NonNull;
+
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
-
-import kr.ac.kaist.kyotong.utils.DateUtils;
 
 /**
- * Created by yearnning on 2014. 9. 12..
- * <br>한 정거장에 대한 하나의 버스의 도착 시간을 나타내는 클래스.
+ * 한 정거장에 대한 하나의 버스의 도착 시간을 나타내는 클래스.
  */
-public class BusTimeModel {
+public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
     private static final String TAG = BusTimeModel.class.getName();
 
-    private int hours;
-    private int minutes;
-    private int seconds;
+    private Calendar time = null;
 
+    /**
+     * 현재 (시스템) 시각으로 버스 출발/도착 시각을 생성한다.
+     */
     public BusTimeModel() {
-        hours = 0;
-        minutes = 0;
-        seconds = 0;
+        time = Calendar.getInstance();
+        time.setLenient(true);
     }
 
     /**
+     * 주어진 시각을 바탕으로 버스 출발/도착 시각을 생성한다.
      *
+     * @param date 날짜 참고용 (시, 분, 초는 사용하지 않음). BusTimeModel은 이 객체를 clone()해서 사용한다.
+     * @param hours 시
+     * @param minutes 분
+     * @param seconds 초
      */
-    public void makeTomorrowBusTime() {
-        hours += 24;
+    public BusTimeModel(Calendar date, int hours, int minutes, int seconds) {
+        time = (Calendar) date.clone();
+        time.setLenient(true);
+        time.set(Calendar.HOUR, hours);
+        time.set(Calendar.MINUTE, minutes);
+        time.set(Calendar.SECOND, seconds);
+        time.set(Calendar.MILLISECOND, 0);
     }
 
     /**
-     * 이 객체가 나타내는 시간을 초로 환산하여 돌려준다.
+     * 이 객체가 나타내는 유닉스 시각을 초 단위로 환산하여 돌려준다.
      *
-     * @return 초로 환산한 시간
+     * @return 초로 환산한 시각
      */
-    public int getAbsoluteSeconds() {
-        return hours * 60 * 60 + minutes * 60 + seconds;
+    public long getAbsoluteSeconds() {
+        return time.getTimeInMillis() / 1000;
     }
 
     /**
-     * 이 객체에 저장된 시간을 변경한다.
+     * 이 객체가 가리키는 시각을 설정한다.
+     *
+     * @param hours   시
+     * @param minutes 분
+     * @param seconds 초
+     */
+    public void setTime(int hours, int minutes, int seconds) {
+        time.set(Calendar.HOUR, hours);
+        time.set(Calendar.MINUTE, minutes);
+        time.set(Calendar.SECOND, seconds);
+    }
+
+    public int getHours() {
+        return time.get(Calendar.HOUR);
+    }
+
+    public int getMinutes() {
+        return time.get(Calendar.MINUTE);
+    }
+
+    public int getSeconds() {
+        return time.get(Calendar.SECOND);
+    }
+
+    /**
+     * 현재 시각에 주어진 시간을 더한다. 음수나 범위를 초과한 값도 허용된다.
      *
      * @param hours 시
      * @param minutes 분
      * @param seconds 초
      */
-    public void setTime(int hours, int minutes, int seconds) {
-        int totalSeconds = hours * 3600 + minutes * 60 + seconds;
-        this.hours = totalSeconds / 3600;
-        this.minutes = (totalSeconds / 60) % 60;
-        this.seconds = totalSeconds % 60;
-    }
-
-    /**
-     * 이 객체에 저장된 시간을 변경한다. 초 단위는 0으로 설정한다.
-     * @param hours 시
-     * @param minutes 분
-     */
-    public void setTime(int hours, int minutes) {
-        setTime(hours, minutes, 0);
-    }
-
-    public int getHours() { return hours; }
-    public int getMinutes() { return minutes; }
-    public int getSeconds() { return seconds; }
-
-    /**
-     * 현재 시각에 주어진 시간(분 단위)를 더한다. (음수도 허용)
-     *
-     * @param minutes 더할 시간 (분 단위)
-     * @return 현재 시각에 {@code minutes}를 더한 시각
-     */
     public void addTime(int hours, int minutes, int seconds) {
-        setTime(this.hours + hours, this.minutes + minutes, this.seconds + seconds);
+        time.add(Calendar.HOUR, hours);
+        time.add(Calendar.MINUTE, minutes);
+        time.add(Calendar.SECOND, seconds);
     }
 
-    /**
-     * 현재 시스템 시간을 돌려준다.
-     *
-     * @return 현재 시스템 시간
-     */
-    public static BusTimeModel getCurrentTime() {
-        Date currentTime = Calendar.getInstance().getTime();
+    @Override
+    public BusTimeModel clone() {
+        try {
+            return (BusTimeModel) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 
-        BusTimeModel busTime = new BusTimeModel();
-        busTime.setTime(currentTime.getHours(), currentTime.getMinutes(), currentTime.getSeconds());
-        return busTime;
+    @Override
+    public int compareTo(BusTimeModel otherBusTime) {
+        return time.compareTo(otherBusTime.time);
     }
 }

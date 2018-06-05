@@ -37,7 +37,7 @@ public class BusTimeListBusTime extends BusTimeListItem {
      */
     @Override
     public boolean hasExpired() {
-        int deltaTotalSeconds = busTime.getAbsoluteSeconds() - BusTimeModel.getCurrentTime().getAbsoluteSeconds();
+        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - (new BusTimeModel()).getAbsoluteSeconds();
 
         return deltaTotalSeconds < -60;
     }
@@ -51,7 +51,7 @@ public class BusTimeListBusTime extends BusTimeListItem {
      * @return 버스의 도착 여부 또는 남은 시간을 나타낸 문자열
      */
     private String getLeftTimeString() {
-        int deltaTotalSeconds = busTime.getAbsoluteSeconds() - BusTimeModel.getCurrentTime().getAbsoluteSeconds();
+        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - (new BusTimeModel()).getAbsoluteSeconds();
 
         if (deltaTotalSeconds < -60)
             return " - ";
@@ -60,10 +60,10 @@ public class BusTimeListBusTime extends BusTimeListItem {
         else if (deltaTotalSeconds < 30)
             return "잠시 후 도착합니다";
         else {
-            int deltaDays    = deltaTotalSeconds / 86400;
-            int deltaHours   = (deltaTotalSeconds / 3600) % 24;
-            int deltaMinutes = (deltaTotalSeconds / 60) % 60;
-            int deltaSeconds = deltaTotalSeconds % 60;
+            long deltaDays    = deltaTotalSeconds / 86400;
+            long deltaHours   = (deltaTotalSeconds / 3600) % 24;
+            long deltaMinutes = (deltaTotalSeconds / 60) % 60;
+            long deltaSeconds = deltaTotalSeconds % 60;
 
             if (deltaDays > 0)
                 return String.format("%d일 %02d시간 %02d분 전", deltaDays, deltaHours, deltaMinutes);
