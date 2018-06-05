@@ -41,20 +41,28 @@ public class BusTimeListDaySeparator extends BusTimeListItem {
      * @return 헤더 문자열
      */
     private String getHeaderStr() {
-        Calendar today = Calendar.getInstance();
-        final int daysInToday = today.get(Calendar.YEAR) * 365 + today.get(Calendar.DAY_OF_YEAR);
-        final int daysInCurrentDate = date.get(Calendar.YEAR) * 365 + date.get(Calendar.DAY_OF_YEAR);
-        final int dayOffset = daysInCurrentDate - daysInToday;
+        final long daysInToday = Calendar.getInstance().getTimeInMillis() / (1000 * 60 * 60 * 24);
+        final long daysInCurrentDate = date.getTimeInMillis() / (1000 * 60 * 60 * 24);
+        final long dayOffset = daysInCurrentDate - daysInToday;
+
+        final String dayOffsetStr;
+        if (dayOffset == -1)
+            dayOffsetStr = "어제";
+        else if (dayOffset == 0)
+            dayOffsetStr = "오늘";
+        else if (dayOffset == 1)
+            dayOffsetStr = "내일";
+        else if (dayOffset == 2)
+            dayOffsetStr = "모레";
+        else if (dayOffset < 0)
+            dayOffsetStr = String.format("%d일 전", dayOffset);
+        else
+            dayOffsetStr = String.format("%d일 후", dayOffset);
 
         final int month = date.get(Calendar.MONTH) + 1;
         final int day = date.get(Calendar.DATE);
         final String dayOfWeekStr = date.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
 
-        if (dayOffset == 1)
-            return String.format("내일(%d월 %d일 %s)", month, day, dayOfWeekStr);
-        else if (dayOffset == 2)
-            return String.format("모레(%d월 %d일 %s)", month, day, dayOfWeekStr);
-        else
-            return String.format("%d일 후(%d월 %d일 %s)", dayOffset, month, day, dayOfWeekStr);
+        return String.format("%s(%d월 %d일 %s)", dayOffsetStr, month, day, dayOfWeekStr);
     }
 }
