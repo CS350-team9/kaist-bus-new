@@ -13,18 +13,15 @@ import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.DateUtils;
 
 
-/**
- * Created by yearnning on 14. 12. 29..
- */
 public class BusApi extends ApiBase {
     private final static String TAG = "BusApi";
 
     private ArrayList<BusStationModel> busStationModels;
     private ArrayList<BusModel> buses = new ArrayList<>();
 
-
     /**
-     * Init
+     * 주어진 버스 노선에 대한 데이터를 생성한다.
+     * @param title_id 버스 노선
      */
     public BusApi(int title_id) {
         busStationModels = createStations(title_id);
