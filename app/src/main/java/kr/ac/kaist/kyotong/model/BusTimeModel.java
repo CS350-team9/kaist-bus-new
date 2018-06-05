@@ -72,6 +72,19 @@ public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
         return time.get(Calendar.SECOND);
     }
 
+    public int getDayOfYear() {
+        return time.get(Calendar.DAY_OF_YEAR);
+    }
+
+    /**
+     * 이 객체가 가리키는 시각을 돌려준다.
+     *
+     * @return 시각 (사본이므로 값을 변경해도 원래 시각에는 영향 없음)
+     */
+    public Calendar getTime() {
+        return (Calendar) time.clone();
+    }
+
     /**
      * 현재 시각에 주어진 시간을 더한다. 음수나 범위를 초과한 값도 허용된다.
      *

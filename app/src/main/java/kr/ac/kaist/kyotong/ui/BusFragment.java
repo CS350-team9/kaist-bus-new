@@ -368,16 +368,16 @@ public class BusFragment extends Fragment {
 
         final BusStationModel busStationModel = busStationModels.get(index);
 
+        //기존의 버스 시간표를 지우고 새로운 시간표를 생성한다.
         mLvAdapter.listItems.clear();
 
-        int currentDayOffset = 1;
+        int currentDayOfYear = -1;
         for (BusTimeModel busTime : busStationModels.get(index).departureTimes) {
             //새로운 날짜를 시작할 때 구분자 추가
-            if (busTime.getAbsoluteSeconds() > currentDayOffset * 86400) {
-                Calendar date = Calendar.getInstance();
-                date.add(Calendar.DATE, currentDayOffset);
-                mLvAdapter.listItems.add(new BusTimeListDaySeparator(date));
-                ++currentDayOffset;
+            final int dayOfYear = busTime.getDayOfYear();
+            if (dayOfYear != currentDayOfYear) {
+                currentDayOfYear = dayOfYear;
+                mLvAdapter.listItems.add(new BusTimeListDaySeparator(busTime.getTime()));
             }
 
             mLvAdapter.listItems.add(new BusTimeListBusTime(busTime));
