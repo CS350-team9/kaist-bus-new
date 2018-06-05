@@ -224,16 +224,10 @@ public class BusFragment extends Fragment {
             }
         });
 
-        /**
-         *
-         */
-        ArrayList<BusTimeModel> busTimeModels = new ArrayList<>();
-        mLvAdapter = new LvAdapter(getActivity(), R.layout.bus_fragment_lv, busTimeModels);
+        ArrayList<BusTimeListItem> busTimeListItems = new ArrayList<>();
+        mLvAdapter = new LvAdapter(getActivity(), R.layout.bus_fragment_lv, busTimeListItems);
         mLv.setAdapter(mLvAdapter);
 
-        /**
-         *
-         */
         mBusApiTask = new BusApiTask();
         mBusApiTask.execute(title_id);
 
@@ -372,23 +366,15 @@ public class BusFragment extends Fragment {
         mShowErrorView = true;
         showErrorView(true, "");
 
-        /**
-         *
-         */
         final BusStationModel busStationModel = busStationModels.get(index);
 
-        /**
-         *
-         */
-        mLvAdapter.busTimeModels.clear();
-        mLvAdapter.busTimeModels.addAll(busStationModels.get(index).departureTimes);
+        mLvAdapter.listItems.clear();
+        for (BusTimeModel busTime : busStationModels.get(index).departureTimes)
+            mLvAdapter.listItems.add(new BusTimeListBusTime(busTime));
         mLvAdapter.notifyDataSetChanged();
 
         mNameTv.setText(busStationModel.name_full);
 
-        /**
-         *
-         */
         if (busStationModel.location != null) {
             mStationMapBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -456,7 +442,7 @@ public class BusFragment extends Fragment {
                 current_second = absolute_second % 60;
                 show_colon = !show_colon;
 
-                mLvAdapter.updateLeftTimeStrInTickets();
+                mLvAdapter.updateBusTimeListItems();
 
                 handler.post(new Runnable() {
                                  public void run() {
@@ -489,14 +475,14 @@ public class BusFragment extends Fragment {
     /**
      * ListView Apdater Setting
      */
-    private class LvAdapter extends ArrayAdapter<BusTimeModel> {
+    private class LvAdapter extends ArrayAdapter<BusTimeListItem> {
         private static final String TAG = "BusFragment LvAdapter";
 
         /**
          *
          */
         private ViewHolder viewHolder = null;
-        public ArrayList<BusTimeModel> busTimeModels;
+        public ArrayList<BusTimeListItem> listItems;
         private int textViewResourceId;
 
         /**
@@ -505,11 +491,11 @@ public class BusFragment extends Fragment {
          * @param articles
          */
         public LvAdapter(Activity context, int textViewResourceId,
-                         ArrayList<BusTimeModel> articles) {
+                         ArrayList<BusTimeListItem> articles) {
             super(context, textViewResourceId, articles);
 
             this.textViewResourceId = textViewResourceId;
-            this.busTimeModels = articles;
+            this.listItems = articles;
 
         }
 
@@ -520,12 +506,12 @@ public class BusFragment extends Fragment {
 
         @Override
         public int getCount() {
-            return busTimeModels.size();
+            return listItems.size();
         }
 
         @Override
-        public BusTimeModel getItem(int position) {
-            return busTimeModels.get(position);
+        public BusTimeListItem getItem(int position) {
+            return listItems.get(position);
         }
 
         @Override
@@ -555,40 +541,18 @@ public class BusFragment extends Fragment {
                 viewHolder.mTimeTv = (TextView) convertView.findViewById(R.id.time_tv);
                 viewHolder.mLeftTv = (TextView) convertView.findViewById(R.id.left_tv);
 
-                convertView.setTag(viewHolder);
+                convertView.setTag(viewHolder); //findViewById()는 속도가 느리므로 나중에 빠르게 불러올 수 있게 ViewHolder를 저장한다.
 
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
 
-            final BusTimeModel busTimeModel = this.getItem(position);
-
-			/*
-             * Data Import and export
-			 */
-
-            if (busTimeModel.isDivider()) {
-                viewHolder.mContentView.setVisibility(View.GONE);
-                viewHolder.mHeaderTv.setVisibility(View.VISIBLE);
-                viewHolder.mHeaderTv.setText(busTimeModel.getHeaderStr());
-                int headerTextColor = 0xFF8A8A8A;
-                if (busTimeModel.isHoliday())
-                    headerTextColor = 0xFFF44336;
-                viewHolder.mHeaderTv.setTextColor(headerTextColor);
-
-            } else {
-                viewHolder.mContentView.setVisibility(View.VISIBLE);
-                viewHolder.mHeaderTv.setVisibility(View.GONE);
-
-                if (!busTimeModel.isIndicator()) {
-                    viewHolder.mTimeTv.setText(busTimeModel.getTimeStr());
-                    viewHolder.mLeftTv.setVisibility(View.VISIBLE);
-                    viewHolder.mLeftTv.setText(busTimeModel.getLeftTimeString());
-                } else {
-                    viewHolder.mTimeTv.setText(busTimeModel.getIndicatorString());
-                    viewHolder.mLeftTv.setVisibility(View.GONE);
-                }
-            }
+            this.getItem(position).updateListItemView(
+                    viewHolder.mHeaderTv,
+                    viewHolder.mContentView,
+                    viewHolder.mTimeTv,
+                    viewHolder.mLeftTv
+            );
 
             return convertView;
         }
@@ -606,23 +570,24 @@ public class BusFragment extends Fragment {
             return false;
         }
 
-        private void updateLeftTimeStrInTickets() {
-            if (busTimeModels.size() > 1 && busTimeModels.get(0).isIndicator() && current_hour >= 24) {
-                busTimeModels.remove(0);
-                busTimeModels.remove(0);
+        private void updateBusTimeListItems() {
+            if (listItems.isEmpty()) {
+                listItems.add(new BusTimeListText("주말 및 공휴일은 운행하지 않습니다"));
+            }
+            else if (listItems.size() > 1 && listItems.get(0) instanceof BusTimeListText && current_hour >= 24) {
+                listItems.remove(0);
+                listItems.remove(0);
 
                 for (BusStationModel busStationModel : busStationModels) {
                     busStationModel.updateHeader();
                 }
             }
 
-            while (busTimeModels.size() > 0 && busTimeModels.get(0).isOverdue())
-                busTimeModels.remove(0);
+            while (listItems.size() > 0 && listItems.get(0).hasExpired())
+                listItems.remove(0);
 
-            if (busTimeModels.size() > 0 && busTimeModels.get(0).isDivider()) {
-                BusTimeModel busTimeModel = new BusTimeModel();
-                busTimeModel.setIndicatorString("당일 버스 운행은 종료되었습니다");
-                busTimeModels.add(0, busTimeModel);
+            if (listItems.size() > 0 && listItems.get(0) instanceof BusTimeListDaySeparator) {
+                listItems.add(0, new BusTimeListText("당일 버스 운행은 종료되었습니다"));
             }
         }
     }

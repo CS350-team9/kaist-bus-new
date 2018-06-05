@@ -97,28 +97,14 @@ public class BusApi extends ApiBase {
     }
 
     private void addBusTimeInBusStations(ArrayList<BusStationModel> busStationModels, ArrayList<BusModel> buses, boolean today) {
-        if (buses.size() > 0) {
-            for (BusModel busModel : buses) {
-                for (int i = 0; i < busModel.busDepartureTimes.size(); i++) {
-                    if (!today) {
-                        busModel.getDepartureTime(i).makeTomorrowBusTime();
-                    }
-                    busModel.getBusDepartureStation(i).addDepartureTime(busModel.getDepartureTime(i));
+        for (BusModel busModel : buses) {
+            for (int i = 0; i < busModel.busDepartureTimes.size(); i++) {
+                if (!today) {
+                    busModel.getDepartureTime(i).makeTomorrowBusTime();
                 }
-            }
-        } else {
-            for (BusStationModel busStationModel : busStationModels) {
-                BusTimeModel busTimeModel = new BusTimeModel();
-                busTimeModel.setIndicatorString("주말 및 공휴일은 운행하지 않습니다");
-                if (today)
-                    busTimeModel.setTime(24, 0);
-                else
-                    busTimeModel.setTime(48, 0);
-
-                busStationModel.addDepartureTime(busTimeModel);
+                busModel.getBusDepartureStation(i).addDepartureTime(busModel.getDepartureTime(i));
             }
         }
-
     }
 
     private void addHeaderInBusStations(ArrayList<BusStationModel> busStaions) {
