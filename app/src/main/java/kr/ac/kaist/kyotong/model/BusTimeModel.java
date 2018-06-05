@@ -32,7 +32,7 @@ public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
     public BusTimeModel(Calendar date, int hours, int minutes, int seconds) {
         time = (Calendar) date.clone();
         time.setLenient(true);
-        time.set(Calendar.HOUR, hours);
+        time.set(Calendar.HOUR_OF_DAY, hours);
         time.set(Calendar.MINUTE, minutes);
         time.set(Calendar.SECOND, seconds);
         time.set(Calendar.MILLISECOND, 0);
@@ -55,13 +55,13 @@ public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
      * @param seconds 초
      */
     public void setTime(int hours, int minutes, int seconds) {
-        time.set(Calendar.HOUR, hours);
+        time.set(Calendar.HOUR_OF_DAY, hours);
         time.set(Calendar.MINUTE, minutes);
         time.set(Calendar.SECOND, seconds);
     }
 
     public int getHours() {
-        return time.get(Calendar.HOUR);
+        return time.get(Calendar.HOUR_OF_DAY);
     }
 
     public int getMinutes() {
@@ -93,7 +93,7 @@ public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
      * @param seconds 초
      */
     public void addTime(int hours, int minutes, int seconds) {
-        time.add(Calendar.HOUR, hours);
+        time.add(Calendar.HOUR_OF_DAY, hours);
         time.add(Calendar.MINUTE, minutes);
         time.add(Calendar.SECOND, seconds);
     }
