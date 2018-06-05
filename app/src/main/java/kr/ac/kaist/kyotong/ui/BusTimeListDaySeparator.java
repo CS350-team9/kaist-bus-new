@@ -55,6 +55,6 @@ public class BusTimeListDaySeparator extends BusTimeListItem {
         else if (dayOffset == 2)
             return String.format("모레(%d월 %d일 %s)", month, day, dayOfWeekStr);
         else
-            return "";
+            return String.format("%d일 후(%d월 %d일 %s)", dayOffset, month, day, dayOfWeekStr);
     }
 }
