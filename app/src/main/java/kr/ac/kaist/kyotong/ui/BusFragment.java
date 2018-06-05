@@ -50,6 +50,8 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
+import org.w3c.dom.Text;
+
 /**
  * 메인 화면의 버스 노선 탭에 대응하는 노선도를 표시하는 Fragment
  */
@@ -489,10 +491,6 @@ public class BusFragment extends Fragment {
     private class LvAdapter extends ArrayAdapter<BusTimeListItem> {
         private static final String TAG = "BusFragment LvAdapter";
 
-        /**
-         *
-         */
-        private ViewHolder viewHolder = null;
         public ArrayList<BusTimeListItem> listItems;
         private int textViewResourceId;
 
@@ -532,48 +530,41 @@ public class BusFragment extends Fragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            TextView headerTextView = null;
+            View contentView = null;
+            TextView timeTextView = null;
+            TextView remainingTimeTextView = null;
 
-			/*
-             * UI Initiailizing : View Holder
-			 */
-
+            //목록을 처음 생성할 때
             if (convertView == null) {
                 convertView = getActivity().getLayoutInflater()
                         .inflate(textViewResourceId, null);
 
-                viewHolder = new ViewHolder();
+                headerTextView = convertView.findViewById(R.id.header_tv);
+                contentView = convertView.findViewById(R.id.content_view);
+                timeTextView = convertView.findViewById(R.id.time_tv);
+                remainingTimeTextView = convertView.findViewById(R.id.left_tv);
 
-                /**
-                 * Find View By ID
-                 */
-                viewHolder.mHeaderTv = (TextView) convertView.findViewById(R.id.header_tv);
-
-                viewHolder.mContentView = convertView.findViewById(R.id.content_view);
-                viewHolder.mTimeTv = (TextView) convertView.findViewById(R.id.time_tv);
-                viewHolder.mLeftTv = (TextView) convertView.findViewById(R.id.left_tv);
-
-                convertView.setTag(viewHolder); //findViewById()는 속도가 느리므로 나중에 빠르게 불러올 수 있게 ViewHolder를 저장한다.
-
-            } else {
-                viewHolder = (ViewHolder) convertView.getTag();
+                //findViewById()는 속도가 느리므로 나중에 View를 빠르게 불러올 수 있게 저장한다
+                convertView.setTag(R.id.header_tv, headerTextView);
+                convertView.setTag(R.id.content_view, contentView);
+                convertView.setTag(R.id.time_tv, timeTextView);
+                convertView.setTag(R.id.left_tv, remainingTimeTextView);
+            } else {    // 이미 생성된 목록을 불러올 때
+                headerTextView = (TextView) convertView.getTag(R.id.header_tv);
+                contentView = (View) convertView.getTag(R.id.content_view);
+                timeTextView = (TextView) convertView.getTag(R.id.time_tv);
+                remainingTimeTextView = (TextView) convertView.getTag(R.id.left_tv);
             }
 
             this.getItem(position).updateListItemView(
-                    viewHolder.mHeaderTv,
-                    viewHolder.mContentView,
-                    viewHolder.mTimeTv,
-                    viewHolder.mLeftTv
+                    headerTextView,
+                    contentView,
+                    timeTextView,
+                    remainingTimeTextView
             );
 
             return convertView;
-        }
-
-        private class ViewHolder {
-            TextView mHeaderTv;
-
-            View mContentView;
-            TextView mTimeTv;
-            TextView mLeftTv;
         }
 
         @Override
