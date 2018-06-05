@@ -14,14 +14,6 @@ public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
     private Calendar time = null;
 
     /**
-     * 현재 (시스템) 시각으로 버스 출발/도착 시각을 생성한다.
-     */
-    public BusTimeModel() {
-        time = Calendar.getInstance();
-        time.setLenient(true);
-    }
-
-    /**
      * 주어진 시각을 바탕으로 버스 출발/도착 시각을 생성한다.
      *
      * @param date 날짜 참고용 (시, 분, 초는 사용하지 않음). BusTimeModel은 이 객체를 clone()해서 사용한다.

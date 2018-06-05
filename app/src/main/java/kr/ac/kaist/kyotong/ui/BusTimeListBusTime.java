@@ -4,6 +4,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import kr.ac.kaist.kyotong.model.BusTimeModel;
+import kr.ac.kaist.kyotong.utils.DateUtils;
 
 /**
  * 버스 시간표 목록에 표시된 버스 도착 시간 항목을 나타내는 클래스
@@ -37,7 +38,7 @@ public class BusTimeListBusTime extends BusTimeListItem {
      */
     @Override
     public boolean hasExpired() {
-        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - (new BusTimeModel()).getAbsoluteSeconds();
+        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - DateUtils.getCurrentAbsoluteSeconds();
 
         return deltaTotalSeconds < -60;
     }
@@ -51,7 +52,7 @@ public class BusTimeListBusTime extends BusTimeListItem {
      * @return 버스의 도착 여부 또는 남은 시간을 나타낸 문자열
      */
     private String getLeftTimeString() {
-        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - (new BusTimeModel()).getAbsoluteSeconds();
+        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - DateUtils.getCurrentAbsoluteSeconds();
 
         if (deltaTotalSeconds < -60)
             return " - ";

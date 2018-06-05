@@ -6,8 +6,16 @@ import java.util.Calendar;
  * 날짜 및 시간 관련 유틸리티 클래스
  */
 public class DateUtils {
+    private static final String TAG = DateUtils.class.getName();
 
-    private static final String TAG = "DateUtils";
+    /**
+     * 현재 (시스템) 시각을 초 단위로 환산하여 돌려준다.
+     *
+     * @return 유닉스 시각 (초 단위)
+     */
+    public static long getCurrentAbsoluteSeconds() {
+        return Calendar.getInstance().getTimeInMillis() / 1000;
+    }
 
     /**
      * 현재 (시스템) 시각이 오전 4시 이전인지 확인한다.
