@@ -41,22 +41,20 @@
 
     </RelativeLayout>
 
-    <com.astuetz.PagerSlidingTabStrip
+    <android.support.design.widget.TabLayout
         android:id="@+id/tabs"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/tabs_height"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="@color/colorPrimary"
         android:clickable="false"
         android:focusable="false"
-        android:textColor="#FFFFFF"
         android:textSize="14sp"
-        app:pstsDividerColor="#00FFFFFF"
-        app:pstsIndicatorColor="@color/colorAccentSecondary"
-        app:pstsIndicatorHeight="2dp"
-        app:pstsShouldExpand="false"
-        app:pstsTabPaddingLeftRight="16dp"
-        app:pstsUnderlineHeight="0dp" />
+        app:tabBackground="@color/colorPrimary"
+        app:tabTextColor="#FFFFFF"
+        app:tabIndicatorColor="@color/colorAccentSecondary"
+        app:tabIndicatorHeight="2dp"
+        app:tabPaddingStart="16dp"
+        app:tabPaddingEnd="16dp" />
 </RelativeLayout>
