@@ -502,7 +502,7 @@ public class BusApi extends ApiBase {
         //이후의 정거장 추가
         for (int deltaMin : deltaMinutes) {
             offset = (offset + 1) % busStationModels.size();
-            visitTime.addTime(9, deltaMin, 0);
+            visitTime.addTime(0, deltaMin, 0);
             bus.addNextStation(busStationModels.get(offset), visitTime.clone());
         }
 
