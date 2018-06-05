@@ -369,8 +369,16 @@ public class BusFragment extends Fragment {
         final BusStationModel busStationModel = busStationModels.get(index);
 
         mLvAdapter.listItems.clear();
-        for (BusTimeModel busTime : busStationModels.get(index).departureTimes)
+
+        int currentDayOffset = 1;
+        for (BusTimeModel busTime : busStationModels.get(index).departureTimes) {
             mLvAdapter.listItems.add(new BusTimeListBusTime(busTime));
+
+            if (busTime.getAbsoluteSeconds() > currentDayOffset * 86400) {
+                mLvAdapter.listItems.add(new BusTimeListDaySeparator(currentDayOffset));
+                ++currentDayOffset;
+            }
+        }
         mLvAdapter.notifyDataSetChanged();
 
         mNameTv.setText(busStationModel.name_full);
