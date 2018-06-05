@@ -9,6 +9,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.util.TypedValue;
 
 import kr.ac.kaist.kyotong.R;
 
@@ -48,6 +49,12 @@ public class SizeUtils {
         int width = size.x;
 
         return width;
+    }
+
+
+    public static int dpToPixels(Context context, float dp) {
+        Resources r = context.getResources();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
     }
 
 
@@ -99,5 +106,4 @@ public class SizeUtils {
 
         return mActionBarSize;
     }
-
 }

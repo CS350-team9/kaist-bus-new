@@ -2,27 +2,29 @@ package kr.ac.kaist.kyotong.ui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Typeface;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
@@ -33,13 +35,20 @@ import java.util.TimerTask;
 
 import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.BusModel;
-
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
 
 import kr.ac.kaist.kyotong.api.BusApi;
 import kr.ac.kaist.kyotong.utils.MapManager;
+
+import android.widget.Switch;
+import android.widget.CompoundButton;
+
+//TODO Google Map 관련 코드를 Custom View 클래스에 몰아넣기
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 
 /**
  * 메인 화면의 버스 노선 탭에 대응하는 노선도를 표시하는 Fragment
@@ -92,21 +101,25 @@ public class BusFragment extends Fragment {
      *
      */
     private View mShadowView;
-    private ImageView mCircleIv;
     private SlidingUpPanelLayout mLayout;
     private ImageButton mStationMapBtn;
     private ImageButton mStationImgBtn;
     private TextView mNameTv;
-    private FrameLayout mMainLayout;
-    private View[] mBusView = new View[3];
-    private ArrayList<TextView> mStationTvs = new ArrayList<TextView>();
-    private ArrayList<View> mStationViews = new ArrayList<View>();
+
+    /** Custom View */
+    CircularBusRouteMapView circularBusRouteMapView;
+    /** 원형 다이어그램과 구글 맵 중 하나를 토글하는 스위치 */
+    private Switch toggleGoogleMapButton;
     private ListView mLv;
     private LvAdapter mLvAdapter;
 
     private View mErrorView;
     private TextView mErrorTv;
     private ProgressBar mErrorPb;
+
+    //TODO Google Map 관련 코드
+    private MapView mapView = null;
+    private GoogleMap googleMap = null;
 
 
     /**
@@ -152,11 +165,22 @@ public class BusFragment extends Fragment {
          */
         mLayout = (SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout);
 
-        mMainLayout = (FrameLayout) rootView.findViewById(R.id.main_layout);
-        mCircleIv = (ImageView) rootView.findViewById(R.id.circle_iv);
-        mBusView[0] = rootView.findViewById(R.id.bus_view_0);
-        mBusView[1] = rootView.findViewById(R.id.bus_view_1);
-        mBusView[2] = rootView.findViewById(R.id.bus_view_2);
+        circularBusRouteMapView = rootView.findViewById(R.id.circular_bus_route_view);
+        toggleGoogleMapButton = rootView.findViewById(R.id.toggle_google_map_switch);
+
+        toggleGoogleMapButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    circularBusRouteMapView.setVisibility(View.GONE);
+                    mapView.setVisibility(View.VISIBLE);
+                }
+                else {
+                    circularBusRouteMapView.setVisibility(View.VISIBLE);
+                    mapView.setVisibility(View.GONE);
+                }
+            }
+        });
 
         mStationMapBtn = (ImageButton) rootView.findViewById(R.id.station_map_btn);
         mStationImgBtn = (ImageButton) rootView.findViewById(R.id.station_img_btn);
@@ -173,16 +197,6 @@ public class BusFragment extends Fragment {
          */
         mLv.addHeaderView(headerView);
         mLv.addFooterView(footerView);
-
-        /**
-         *
-         */
-        initBus();
-
-        /**
-         *
-         */
-        mMainLayout.setLayoutParams(new LinearLayout.LayoutParams(mContentWidth, mContentHeight));
 
         /**
          *
@@ -233,6 +247,17 @@ public class BusFragment extends Fragment {
 //                openBab();
 //            }
 //        });
+
+        mapView = rootView.findViewById(R.id.mapView);
+        mapView.setVisibility(View.INVISIBLE);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                BusFragment.this.googleMap = googleMap;
+                initializeGoogleMap();
+            }
+        });
 
         /**
          *
@@ -310,10 +335,13 @@ public class BusFragment extends Fragment {
             busStationModels.addAll((ArrayList<BusStationModel>) maps.get("busStations"));
             buses.addAll((ArrayList<BusModel>) maps.get("buses"));
 
-            /**
-             *
-             */
-            initStations(busStationModels);
+            circularBusRouteMapView.setOnStationClickListener(new CircularBusRouteMapView.OnStationClickListener() {
+                @Override
+                public void onStationClick(int stationIndex) {
+                    updateStation(stationIndex);
+                }
+            });
+            circularBusRouteMapView.updateStations(busStationModels);
 
             updateStation(0);
 
@@ -335,109 +363,8 @@ public class BusFragment extends Fragment {
     }
 
     /**
-     *
-     */
-    private void initBus() {
-
-        int busViewRadius = (int) (((float) mContentHeight) * 0.02f);
-        int circleRadius = (int) (((float) mContentHeight) * 0.20f);
-
-        FrameLayout.LayoutParams params;
-        params = new FrameLayout.LayoutParams(circleRadius * 2, circleRadius * 2);
-        params.gravity = Gravity.CENTER;
-        mCircleIv.setLayoutParams(params);
-
-        for (int i = 0; i < 3; i++) {
-            mBusView[i].setPivotX(busViewRadius);
-            mBusView[i].setPivotY(busViewRadius + circleRadius);
-            params = new FrameLayout.LayoutParams(busViewRadius * 2, busViewRadius * 2);
-            params.gravity = Gravity.CENTER;
-            params.bottomMargin = circleRadius;
-            mBusView[i].setLayoutParams(params);
-        }
-    }
-
-    /**
-     * @param busStationModels
-     */
-    private void initStations(ArrayList<BusStationModel> busStationModels) {
-
-        FrameLayout.LayoutParams params;
-        int station_tv_padding = (int) ((((float) mContentHeight) * 0.05f));
-        float station_tv_radius_x = ((float) mContentHeight) * 0.45f;
-        float station_tv_radius_y = ((float) mContentHeight) * 0.37f;
-        int station_radius = (int) (((float) mContentHeight) * 0.06f);
-        float station_view_radius = ((float) mContentHeight) * 0.27f;
-
-        for (int i = 0; i < (busStationModels.size() - 1); i++) {
-
-            /**
-             *
-             */
-            final int index = i;
-            BusStationModel busStationModel = busStationModels.get(i);
-
-            /**
-             *
-             */
-            TextView stationTv = new TextView(getActivity());
-            params = new FrameLayout.LayoutParams(-2, -2);
-            params.gravity = Gravity.CENTER;
-            params.leftMargin = (int) (station_tv_radius_x * Math.sin(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            params.bottomMargin = (int) (station_tv_radius_y * Math.cos(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            stationTv.setPadding(station_tv_padding, station_tv_padding, station_tv_padding, station_tv_padding);
-            stationTv.setLayoutParams(params);
-            stationTv.setText(busStationModel.name);
-            stationTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, station_radius);
-            stationTv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    updateStation(index);
-                }
-            });
-            mMainLayout.addView(stationTv, 2);
-            mStationTvs.add(stationTv);
-
-            /**
-             *
-             */
-            View stationView = new View(getActivity());
-            params = new FrameLayout.LayoutParams(station_radius, station_radius);
-            params.gravity = Gravity.CENTER;
-            params.leftMargin = (int) (station_view_radius * Math.sin(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            params.bottomMargin = (int) (station_view_radius * Math.cos(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            stationView.setLayoutParams(params);
-            stationView.setBackgroundResource(R.drawable.bus_fragment_station);
-            stationView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    updateStation(index);
-                }
-            });
-            mMainLayout.addView(stationView, 2);
-            mStationViews.add(stationView);
-
-            /**
-             *
-             */
-            View stationBtn = new View(getActivity());
-            params = new FrameLayout.LayoutParams(station_radius * 5 / 2, station_radius * 5 / 2);
-            params.gravity = Gravity.CENTER;
-            params.leftMargin = (int) (station_view_radius * Math.sin(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            params.bottomMargin = (int) (station_view_radius * Math.cos(2 * Math.PI * ((float) busStationModel.degree) / 360f));
-            stationBtn.setLayoutParams(params);
-            stationBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    updateStation(index);
-                }
-            });
-            mMainLayout.addView(stationBtn, 2);
-        }
-    }
-
-    /**
-     * @param index
+     * index에 해당하는 정거장이 클릭되었을 때 UI를 업데이트한다.
+     * @param index 클릭한 정거장을 나타내는 숫자 (0부터 시작)
      */
     private void updateStation(int index) {
 
@@ -457,9 +384,6 @@ public class BusFragment extends Fragment {
         mLvAdapter.busTimeModels.addAll(busStationModels.get(index).departureTimes);
         mLvAdapter.notifyDataSetChanged();
 
-        for (BusTimeModel busTimeModel : mLvAdapter.busTimeModels) {
-            Log.d(TAG, "time_str -> " + busTimeModel.time_str + ", header -> " + busTimeModel.header);
-        }
         mNameTv.setText(busStationModel.name_full);
 
         /**
@@ -494,22 +418,6 @@ public class BusFragment extends Fragment {
             mStationImgBtn.setVisibility(View.GONE);
         }
 
-        /**
-         *
-         */
-        for (View stationView : mStationViews) {
-            stationView.setBackgroundResource(R.drawable.bus_fragment_station);
-        }
-        mStationViews.get(index).setBackgroundResource(R.drawable.bus_fragment_station_selected);
-
-        for (TextView stationTv : mStationTvs) {
-            stationTv.setTypeface(null, Typeface.NORMAL);
-        }
-        mStationTvs.get(index).setTypeface(null, Typeface.BOLD);
-
-        /**
-         *
-         */
         mUpdateStationRunning = false;
 
     }
@@ -552,7 +460,8 @@ public class BusFragment extends Fragment {
 
                 handler.post(new Runnable() {
                                  public void run() {
-                                     setCurrentBusLocations(getCurrentBusLocations());
+                                     circularBusRouteMapView.updateBuses(buses);
+
                                      mLvAdapter.notifyDataSetChanged();
                                      if (mShowErrorView && !mUpdateStationRunning && mBusApiTask == null) {
 
@@ -573,41 +482,6 @@ public class BusFragment extends Fragment {
 
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-
-    /**
-     * @return
-     */
-    private int[] getCurrentBusLocations() {
-
-        int[] locations = {-1, -1, -1};
-        int cur = 0;
-        for (BusModel busModel : buses) {
-            int location = busModel.getLocation(current_hour, current_minute, current_second);
-            if (location != -1) {
-                locations[cur] = location;
-                cur++;
-            }
-        }
-
-        return locations;
-    }
-
-    /**
-     * @param locations
-     */
-    private void setCurrentBusLocations(int[] locations) {
-
-        for (int i = 0; i < 3; i++) {
-
-            if (locations[i] == -1) {
-                mBusView[i].setVisibility(View.GONE);
-            } else {
-                mBusView[i].setVisibility(View.VISIBLE);
-                mBusView[i].setRotation(locations[i]);
             }
         }
     }
@@ -693,22 +567,25 @@ public class BusFragment extends Fragment {
              * Data Import and export
 			 */
 
-            if (busTimeModel.header != null) {
+            if (busTimeModel.isDivider()) {
                 viewHolder.mContentView.setVisibility(View.GONE);
                 viewHolder.mHeaderTv.setVisibility(View.VISIBLE);
-                viewHolder.mHeaderTv.setText(busTimeModel.header);
-                viewHolder.mHeaderTv.setTextColor(busTimeModel.header_textColor);
+                viewHolder.mHeaderTv.setText(busTimeModel.getHeaderStr());
+                int headerTextColor = 0xFF8A8A8A;
+                if (busTimeModel.isHoliday())
+                    headerTextColor = 0xFFF44336;
+                viewHolder.mHeaderTv.setTextColor(headerTextColor);
 
             } else {
                 viewHolder.mContentView.setVisibility(View.VISIBLE);
                 viewHolder.mHeaderTv.setVisibility(View.GONE);
 
-                if (busTimeModel.indicator == null) {
-                    viewHolder.mTimeTv.setText(busTimeModel.time_str);
+                if (!busTimeModel.isIndicator()) {
+                    viewHolder.mTimeTv.setText(busTimeModel.getTimeStr());
                     viewHolder.mLeftTv.setVisibility(View.VISIBLE);
-                    viewHolder.mLeftTv.setText(busTimeModel.left_time_str);
+                    viewHolder.mLeftTv.setText(busTimeModel.getLeftTimeString());
                 } else {
-                    viewHolder.mTimeTv.setText(busTimeModel.indicator);
+                    viewHolder.mTimeTv.setText(busTimeModel.getIndicatorString());
                     viewHolder.mLeftTv.setVisibility(View.GONE);
                 }
             }
@@ -730,19 +607,7 @@ public class BusFragment extends Fragment {
         }
 
         private void updateLeftTimeStrInTickets() {
-
-            /**
-             *
-             */
-            for (BusTimeModel busTimeModel : busTimeModels) {
-                if (busTimeModel.header != null) {
-                    continue;
-                }
-                busTimeModel.updateLeftTimeStr(current_hour, current_minute, current_second);
-            }
-
-            if ((busTimeModels.size() > 1) && (busTimeModels.get(0).indicator != null)
-                    && (current_hour >= 24)) {
+            if (busTimeModels.size() > 1 && busTimeModels.get(0).isIndicator() && current_hour >= 24) {
                 busTimeModels.remove(0);
                 busTimeModels.remove(0);
 
@@ -751,15 +616,12 @@ public class BusFragment extends Fragment {
                 }
             }
 
-            while ((busTimeModels.size() > 0)
-                    && (busTimeModels.get(0).left_time_str != null)
-                    && (busTimeModels.get(0).left_time_str.equals(" - "))) {
+            while (busTimeModels.size() > 0 && busTimeModels.get(0).isOverdue())
                 busTimeModels.remove(0);
-            }
 
-            if ((busTimeModels.size() > 0) && (busTimeModels.get(0).header != null)) {
+            if (busTimeModels.size() > 0 && busTimeModels.get(0).isDivider()) {
                 BusTimeModel busTimeModel = new BusTimeModel();
-                busTimeModel.indicator = "당일 버스 운행은 종료되었습니다";
+                busTimeModel.setIndicatorString("당일 버스 운행은 종료되었습니다");
                 busTimeModels.add(0, busTimeModel);
             }
         }
@@ -785,9 +647,99 @@ public class BusFragment extends Fragment {
             mBusTimerTask = null;
         }
 
+        mapView.onDestroy();
         super.onDestroy();
-
     }
 
+
+    //MapView를 사용하기 위해 필요함
+    @Override
+    public void onStart() {
+        super.onStart();
+        mapView.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        mapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        mapView.onStop();
+        super.onStop();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onLowMemory() {
+        mapView.onLowMemory();
+        super.onLowMemory();
+    }
+
+    public void initializeGoogleMap() {
+        BusApi busApi = new BusApi(R.string.tab_kaist_wolpyeong);
+
+        ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
+
+        int padding = -5;
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        for (int i = 0; i < busStationModels.size(); i++) {
+            BusStationModel bm = busStationModels.get(i);
+            // marker at stations;
+            LatLng loc = bm.location;
+            LatLng thisStation = new LatLng(loc.latitude, loc.longitude);
+            builder.include(thisStation);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(thisStation);
+            markerOptions.title(bm.name);
+            googleMap.addMarker(markerOptions);
+
+            // polyline at path
+            ArrayList<LatLng> pointsOnPathToNextStation = (ArrayList<LatLng>) bm.pointsOnPathToNextStation.clone();
+
+            pointsOnPathToNextStation.add(0, thisStation);
+            if (i < busStationModels.size() - 1) {
+                pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(busStationModels.get(i+1).location.latitude,
+                        busStationModels.get(i+1).location.longitude));
+            }
+            PolylineOptions polylineOptions = new PolylineOptions();
+            polylineOptions.color(Color.RED);
+            polylineOptions.width(10);
+            polylineOptions.addAll(pointsOnPathToNextStation);
+            googleMap.addPolyline(polylineOptions);
+
+        }
+
+        LatLngBounds bounds = builder.build();
+        final CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(busStationModels.get(0).location.getLatitude(), busStationModels.get(0).location.getLongitude())));
+//        googleMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+
+        googleMap.animateCamera(cu);
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                Log.d(TAG, "onMarkerClick");
+                return true;
+            }
+        });
+
+    }
 }
 
