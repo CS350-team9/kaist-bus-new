@@ -107,7 +107,7 @@ public class CircularBusRouteMapView extends ConstraintLayout {
 
         for (int i = 0; i < stations.size(); ++i) {
             final int stationIndex = i;
-            stationNameViews.get(i).setText(stations.get(i).name_full);
+            stationNameViews.get(i).setText(stations.get(i).getFullName());
             View.OnClickListener iconClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -140,7 +140,7 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         ConstraintSet constraints = new ConstraintSet();
         constraints.clone(this);
         for (int i = 0; i < stations.size(); ++i) {
-            float stationAngle = (float) (stations.get(i).degree);
+            float stationAngle = (float) (stations.get(i).getDegree());
             constraints.constrainCircle(stationIcons.get(i).getId(), getId(), stationIconOffset, stationAngle);
             constraints.constrainCircle(stationNameViews.get(i).getId(), getId(), stationNameViewOffset, stationAngle);
         }

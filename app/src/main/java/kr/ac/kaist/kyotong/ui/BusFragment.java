@@ -374,7 +374,9 @@ public class BusFragment extends Fragment {
         mLvAdapter.listItems.clear();
 
         int currentDayOfYear = -1;
-        for (BusTimeModel busTime : busStationModels.get(index).departureTimes) {
+        for (int i = 0; i < busStationModel.getVisitingBusCount(); ++i) {
+            BusTimeModel busTime = busStationModel.getVisitTime(i);
+
             //새로운 날짜를 시작할 때 구분자 추가
             final int dayOfYear = busTime.getDayOfYear();
             if (dayOfYear != currentDayOfYear) {
@@ -386,13 +388,13 @@ public class BusFragment extends Fragment {
         }
         mLvAdapter.notifyDataSetChanged();
 
-        mNameTv.setText(busStationModel.name_full);
+        mNameTv.setText(busStationModel.getFullName());
 
-        if (busStationModel.location != null) {
+        if (busStationModel.getCoordinates() != null) {
             mStationMapBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    MapManager mm = new MapManager(busStationModel.location);
+                    MapManager mm = new MapManager(busStationModel.getCoordinates());
                     mm.showMap(getActivity());
 
                 }
@@ -402,14 +404,11 @@ public class BusFragment extends Fragment {
             mStationMapBtn.setVisibility(View.GONE);
         }
 
-        /**
-         *
-         */
-        if (busStationModel.img_resource != -1) {
+        if (busStationModel.getImgResource() != -1) {
             mStationImgBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ImageActivity.startIntent(getActivity(), busStationModel.img_resource);
+                    ImageActivity.startIntent(getActivity(), busStationModel.getImgResource());
                 }
             });
             mStationImgBtn.setVisibility(View.VISIBLE);
@@ -663,21 +662,21 @@ public class BusFragment extends Fragment {
         for (int i = 0; i < busStationModels.size(); i++) {
             BusStationModel bm = busStationModels.get(i);
             // marker at stations;
-            LatLng loc = bm.location;
+            LatLng loc = bm.getCoordinates();
             LatLng thisStation = new LatLng(loc.latitude, loc.longitude);
             builder.include(thisStation);
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(thisStation);
-            markerOptions.title(bm.name);
+            markerOptions.title(bm.getName());
             googleMap.addMarker(markerOptions);
 
             // polyline at path
-            ArrayList<LatLng> pointsOnPathToNextStation = (ArrayList<LatLng>) bm.pointsOnPathToNextStation.clone();
+            ArrayList<LatLng> pointsOnPathToNextStation = (ArrayList<LatLng>) bm.getPathToNextStation().clone();
 
             pointsOnPathToNextStation.add(0, thisStation);
             if (i < busStationModels.size() - 1) {
-                pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(busStationModels.get(i+1).location.latitude,
-                        busStationModels.get(i+1).location.longitude));
+                LatLng coords = busStationModels.get(i+1).getCoordinates();
+                pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(coords.latitude, coords.longitude));
             }
             PolylineOptions polylineOptions = new PolylineOptions();
             polylineOptions.color(Color.RED);

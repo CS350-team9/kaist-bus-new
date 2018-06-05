@@ -4,63 +4,103 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
 /**
  * Created by yearnning on 14. 12. 20..
  * <br>버스 정거장을 나타내는 클래스
  */
 public class BusStationModel {
-    private static final String TAG = "BusStation";
-
-    /**
-     * @param name_full
-     * @param degree
-     * @return
-     */
-    public static BusStationModel newInstance(String name_full, int degree, LatLng location) {
-        BusStationModel busStationModel = new BusStationModel();
-        busStationModel.name_full = name_full;
-        if (name_full.contains("(") && name_full.contains(")")) {
-            busStationModel.name = name_full.substring(0, name_full.indexOf("("));
-        } else {
-            busStationModel.name = name_full;
-        }
-        busStationModel.degree = degree;
-        busStationModel.location = location;
-        return busStationModel;
+    public int getDegree() {
+        return degree;
     }
 
-    public static BusStationModel newInstance(String name_full, int degree, LatLng location, int img_resource) {
-        BusStationModel busStationModel = BusStationModel.newInstance(name_full, degree, location);
-        busStationModel.img_resource = img_resource;
-        return busStationModel;
+    public int getImgResource() {
+        return imgResource;
     }
 
-    /**
-     *
-     */
-    public LatLng location = null;
-    public String name = "";
-    public String name_full = "";
-    /** 원형 버스 노선도에서 정거장을 점으로 표시할 위치를 나타내는 각도(degree) */
-    public int degree = 0;
-    /** 정거장의 사진을 가리키는 그림 리소스 */
-    public int img_resource = -1;
+    public BusTimeModel getVisitTime(int index) {
+        return visitTimes.get(index);
+    }
 
-    public ArrayList<BusTimeModel> departureTimes = new ArrayList<BusTimeModel>();
+    public int getVisitingBusCount() {
+        return visitTimes.size();
+    }
 
-    /** 이 버스 정거장에서 다음 정거장까지의 경로를 구성하는 꼭짓점의 좌표 (두 정거장의 좌표는 포함하지 않음) */
-    public ArrayList<LatLng> pointsOnPathToNextStation = new ArrayList<>();
+    public LatLng getCoordinates() {
+        return coordinates;
+    }
+
+    public ArrayList<LatLng> getPathToNextStation() {
+        return pathToNextStation;
+    }
+
+    public BusStationModel(String fullName, int degree, LatLng coordinates) {
+        this.fullName = fullName;
+        if (fullName.contains("(") && fullName.contains(")"))
+            name = fullName.substring(0, fullName.indexOf("("));
+        else
+            name = fullName;
+
+        this.degree = degree;
+        this.coordinates = coordinates;
+    }
+
+    public BusStationModel(String fullName, int degree, LatLng coordinates, int imgResource) {
+        this(fullName, degree, coordinates);
+        this.imgResource = imgResource;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public void addDepartureTime(BusTimeModel busTimeModel) {
-        departureTimes.add(busTimeModel);
+        visitTimes.add(busTimeModel);
+    }
+
+    public void addNextPointOnPath(LatLng point) {
+        pathToNextStation.add(point);
     }
 
     /**
      * 보관하고 있는 버스 시간표를 정렬한다.
      */
     public void sortBusTimes() {
-        Collections.sort(departureTimes);
+        Collections.sort(visitTimes);
     }
+
+
+    private static final String TAG = BusStationModel.class.getName();
+    /**
+     * 짧은 이름 (지도에 표시)
+     */
+    private String name = "";
+    /**
+     * 긴 이름 (목록에 표시)
+     */
+    private String fullName = "";
+    /**
+     * 원형 버스 노선도에서 정거장을 점으로 표시할 위치를 나타내는 각도(degree)
+     */
+    private int degree = 0;
+    /**
+     * 정거장의 사진을 가리키는 그림 리소스
+     */
+    private int imgResource = -1;
+    /**
+     * 이 정거장에 모든 버스가 방문하는 시각
+     */
+    private ArrayList<BusTimeModel> visitTimes = new ArrayList<>();
+    /**
+     * 좌표
+     */
+    private LatLng coordinates = null;
+    /**
+     * 이 버스 정거장에서 다음 정거장까지의 경로를 구성하는 꼭짓점의 좌표 (두 정거장의 좌표는 포함하지 않음)
+     */
+    private ArrayList<LatLng> pathToNextStation = new ArrayList<>();
 }

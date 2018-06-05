@@ -351,56 +351,56 @@ public class BusApi extends ApiBase {
              * KAIST
              */
             case R.string.tab_kaist_olev:
-                busStationModels.add(BusStationModel.newInstance("카이마루", 0, new LatLng(36.373428, 127.359221)));
-                busStationModels.add(BusStationModel.newInstance("스컴", 30, new LatLng(36.372784, 127.361855)));
-                busStationModels.add(BusStationModel.newInstance("창의관", 60, new LatLng(36.370849, 127.362381)));
-                busStationModels.add(BusStationModel.newInstance("의과학센터", 110, new LatLng(36.370193, 127.365932)));
-                busStationModels.add(BusStationModel.newInstance("파팔라도", 140, new LatLng(36.369545, 127.369612)));
-                busStationModels.add(BusStationModel.newInstance("정문", 200, new LatLng(36.366357, 127.363614)));
-                busStationModels.add(BusStationModel.newInstance("오리연못", 230, new LatLng(36.367420, 127.362574)));
-                busStationModels.add(BusStationModel.newInstance("교육지원동", 270, new LatLng(36.370020, 127.360728)));
-                busStationModels.add(BusStationModel.newInstance("아름관(간이)", 310, new LatLng(36.373484, 127.356651)));
-                busStationModels.add(BusStationModel.newInstance("카이마루", 360, new LatLng(36.373428, 127.359221)));
+                busStationModels.add(new BusStationModel("카이마루", 0, new LatLng(36.373428, 127.359221)));
+                busStationModels.add(new BusStationModel("스컴", 30, new LatLng(36.372784, 127.361855)));
+                busStationModels.add(new BusStationModel("창의관", 60, new LatLng(36.370849, 127.362381)));
+                busStationModels.add(new BusStationModel("의과학센터", 110, new LatLng(36.370193, 127.365932)));
+                busStationModels.add(new BusStationModel("파팔라도", 140, new LatLng(36.369545, 127.369612)));
+                busStationModels.add(new BusStationModel("정문", 200, new LatLng(36.366357, 127.363614)));
+                busStationModels.add(new BusStationModel("오리연못", 230, new LatLng(36.367420, 127.362574)));
+                busStationModels.add(new BusStationModel("교육지원동", 270, new LatLng(36.370020, 127.360728)));
+                busStationModels.add(new BusStationModel("아름관(간이)", 310, new LatLng(36.373484, 127.356651)));
+                busStationModels.add(new BusStationModel("카이마루", 360, new LatLng(36.373428, 127.359221)));
 
                 for (int i = 0; i < pathsBetweenStations_olev.length; ++i) {
                     for (LatLng coords : pathsBetweenStations_olev[i])
-                        busStationModels.get(i).pointsOnPathToNextStation.add(coords);
+                        busStationModels.get(i).addNextPointOnPath(coords);
                 }
 
                 break;
 
             case R.string.tab_kaist_wolpyeong:
-                busStationModels.add(BusStationModel.newInstance("강당", 0, new LatLng(36.372485, 127.363282)));
-                busStationModels.add(BusStationModel.newInstance("본관", 30, new LatLng(36.369884, 127.360720)));
-                busStationModels.add(BusStationModel.newInstance("오리연못", 60, new LatLng(36.367198, 127.362556)));
-                busStationModels.add(BusStationModel.newInstance("충남대앞(일미식당)", 97, new LatLng(36.361533, 127.345736), R.drawable.station_kaist_wolpyeong_3));
-                busStationModels.add(BusStationModel.newInstance("월평역(1번출구)", 128, new LatLng(36.358109, 127.364356), R.drawable.station_kaist_wolpyeong_4));
-                busStationModels.add(BusStationModel.newInstance("갤러리아(대일빌딩)", 189, new LatLng(36.352054, 127.376309), R.drawable.station_kaist_wolpyeong_5));
-                busStationModels.add(BusStationModel.newInstance("청사시외(택시승강장)", 232, new LatLng(36.361140, 127.379472), R.drawable.station_kaist_wolpyeong_6));
-                busStationModels.add(BusStationModel.newInstance("월평역(3번출구)", 282, new LatLng(36.358587, 127.363199), R.drawable.station_kaist_wolpyeong_7));
-                busStationModels.add(BusStationModel.newInstance("오리연못", 300, new LatLng(36.367420, 127.362574)));
-                busStationModels.add(BusStationModel.newInstance("본관", 330, new LatLng(36.369929, 127.360819)));
-                busStationModels.add(BusStationModel.newInstance("강당", 360, new LatLng(36.372404, 127.363313)));
+                busStationModels.add(new BusStationModel("강당", 0, new LatLng(36.372485, 127.363282)));
+                busStationModels.add(new BusStationModel("본관", 30, new LatLng(36.369884, 127.360720)));
+                busStationModels.add(new BusStationModel("오리연못", 60, new LatLng(36.367198, 127.362556)));
+                busStationModels.add(new BusStationModel("충남대앞(일미식당)", 97, new LatLng(36.361533, 127.345736), R.drawable.station_kaist_wolpyeong_3));
+                busStationModels.add(new BusStationModel("월평역(1번출구)", 128, new LatLng(36.358109, 127.364356), R.drawable.station_kaist_wolpyeong_4));
+                busStationModels.add(new BusStationModel("갤러리아(대일빌딩)", 189, new LatLng(36.352054, 127.376309), R.drawable.station_kaist_wolpyeong_5));
+                busStationModels.add(new BusStationModel("청사시외(택시승강장)", 232, new LatLng(36.361140, 127.379472), R.drawable.station_kaist_wolpyeong_6));
+                busStationModels.add(new BusStationModel("월평역(3번출구)", 282, new LatLng(36.358587, 127.363199), R.drawable.station_kaist_wolpyeong_7));
+                busStationModels.add(new BusStationModel("오리연못", 300, new LatLng(36.367420, 127.362574)));
+                busStationModels.add(new BusStationModel("본관", 330, new LatLng(36.369929, 127.360819)));
+                busStationModels.add(new BusStationModel("강당", 360, new LatLng(36.372404, 127.363313)));
 
                 for (int i = 0; i < pathsBetweenStations_wolpyeong.length; ++i) {
                     for (LatLng coords : pathsBetweenStations_wolpyeong[i])
-                        busStationModels.get(i).pointsOnPathToNextStation.add(coords);
+                        busStationModels.get(i).addNextPointOnPath(coords);
                 }
 
                 break;
 
             case R.string.tab_kaist_sunhwan:
-                busStationModels.add(BusStationModel.newInstance("문지캠퍼스(화암방향)", 0, new LatLng(36.393770, 127.399925)));
-                busStationModels.add(BusStationModel.newInstance("화암기숙사", 90, new LatLng(36.408435, 127.381788)));
-                busStationModels.add(BusStationModel.newInstance("문지캠퍼스(본원방향)", 180, new LatLng(36.393794, 127.400063)));
-                busStationModels.add(BusStationModel.newInstance("로덴하우스", 225, new LatLng(36.388011, 127.378545)));
-                busStationModels.add(BusStationModel.newInstance("본원(대덕캠퍼스)", 270, new LatLng(36.372485, 127.363282)));
-                busStationModels.add(BusStationModel.newInstance("교수아파트", 315, new LatLng(36.388524, 127.379928)));
-                busStationModels.add(BusStationModel.newInstance("문지", 360, new LatLng(36.393770, 127.399925)));
+                busStationModels.add(new BusStationModel("문지캠퍼스(화암방향)", 0, new LatLng(36.393770, 127.399925)));
+                busStationModels.add(new BusStationModel("화암기숙사", 90, new LatLng(36.408435, 127.381788)));
+                busStationModels.add(new BusStationModel("문지캠퍼스(본원방향)", 180, new LatLng(36.393794, 127.400063)));
+                busStationModels.add(new BusStationModel("로덴하우스", 225, new LatLng(36.388011, 127.378545)));
+                busStationModels.add(new BusStationModel("본원(대덕캠퍼스)", 270, new LatLng(36.372485, 127.363282)));
+                busStationModels.add(new BusStationModel("교수아파트", 315, new LatLng(36.388524, 127.379928)));
+                busStationModels.add(new BusStationModel("문지", 360, new LatLng(36.393770, 127.399925)));
 
                 for (int i = 0; i < pathsBetweenStations_munji.length; ++i) {
                     for (LatLng coords : pathsBetweenStations_munji[i])
-                        busStationModels.get(i).pointsOnPathToNextStation.add(coords);
+                        busStationModels.get(i).addNextPointOnPath(coords);
                 }
 
                 break;
