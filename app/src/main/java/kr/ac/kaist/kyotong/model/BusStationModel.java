@@ -54,44 +54,4 @@ public class BusStationModel {
     public void addDepartureTime(BusTimeModel busTimeModel) {
         departureTimes.add(busTimeModel);
     }
-
-    /**
-     * 버스 시간표의 내일/모레 도착 항목을 알아보기 좋게 구분자(헤더)를 추가한다.
-     */
-    public void addHeader() {
-
-        //내일 구분자
-        int i = 0;
-        while (i < departureTimes.size() && departureTimes.get(i).getAbsoluteSeconds() <= 24 * 3600) {
-            i++;
-        }
-        BusTimeModel divider = new BusTimeModel();
-        divider.setDividerDayOffset(1);
-        departureTimes.add(i, divider);
-        i++;
-
-        //모레 구분자
-        while (i < departureTimes.size() && departureTimes.get(i).getAbsoluteSeconds() <= 48 * 3600) {
-            i++;
-        }
-        if (i < departureTimes.size()) {
-            divider = new BusTimeModel();
-            divider.setDividerDayOffset(2);
-            departureTimes.add(i, divider);
-        }
-    }
-
-    /**
-     *
-     */
-    public void updateHeader() {
-        for (int i = 0; i < departureTimes.size(); i++) {
-            BusTimeModel busTimeModel = departureTimes.get(i);
-            if (busTimeModel.getDividerDayOffset() == 2) {
-                busTimeModel.setDividerDayOffset(1);
-                break;
-            }
-        }
-    }
-
 }

@@ -13,13 +13,11 @@ import kr.ac.kaist.kyotong.utils.DateUtils;
 public class BusTimeModel {
     private static final String TAG = BusTimeModel.class.getName();
 
-    private int dayOffset;
     private int hours;
     private int minutes;
     private int seconds;
 
     public BusTimeModel() {
-        dayOffset = 0;
         hours = 0;
         minutes = 0;
         seconds = 0;
@@ -62,31 +60,6 @@ public class BusTimeModel {
      */
     public void setTime(int hours, int minutes) {
         setTime(hours, minutes, 0);
-    }
-
-    /**
-     * 이 객체를 시간표에서 내일/모레 항목을 나타내기 위한 구분자로 변환한다.
-     *
-     * @param dayOffset 내일은 1, 모레는 2
-     */
-    public void setDividerDayOffset(int dayOffset) {
-        this.dayOffset = dayOffset;
-    }
-
-    /**
-     * 이 객체가 구분자일 경우, 내일이면 1, 모레이면 2를 돌려준다. 구분자가 아닐 경우 0을 돌려준다.
-     *
-     * @return
-     */
-    public int getDividerDayOffset() { return dayOffset; }
-
-    /**
-     * 이 객체가 시간표에서 내일/모레 구분자를 나타내는 객체일 경우 true를,
-     * 일반적인 시각을 나타내는 항목일 경우 false를 돌려준다.
-     * @return
-     */
-    public boolean isDivider() {
-        return dayOffset != 0;
     }
 
     /**

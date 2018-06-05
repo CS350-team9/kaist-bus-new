@@ -13,10 +13,10 @@ import kr.ac.kaist.kyotong.utils.DateUtils;
  */
 public class BusTimeListDaySeparator extends BusTimeListItem {
     /** 이 구분자가 표시할 기준 날짜 */
-    private int dayOffset = 0; //TODO 정수 대신 실제 날짜를 저장한다
+    private Calendar date;
 
-    public BusTimeListDaySeparator(int dayOffset) {
-        this.dayOffset = dayOffset;
+    public BusTimeListDaySeparator(Calendar date) {
+        this.date = (Calendar) date.clone();
     }
 
     public void updateListItemView(
@@ -30,7 +30,7 @@ public class BusTimeListDaySeparator extends BusTimeListItem {
         headerTextView.setText(getHeaderStr());
 
         int headerColor = 0xFF8A8A8A;
-        if (DateUtils.isHoliday(dayOffset))
+        if (DateUtils.isHoliday(date))
             headerColor = 0xFFF44336;
         headerTextView.setTextColor(headerColor);
     }
@@ -41,19 +41,20 @@ public class BusTimeListDaySeparator extends BusTimeListItem {
      * @return 헤더 문자열
      */
     private String getHeaderStr() {
-        Calendar c = Calendar.getInstance();
-        c.setLenient(true);
-        c.set(Calendar.DATE, c.get(Calendar.DATE) + dayOffset);
+        Calendar today = Calendar.getInstance();
+        final int daysInToday = today.get(Calendar.YEAR) * 365 + today.get(Calendar.DAY_OF_YEAR);
+        final int daysInCurrentDate = date.get(Calendar.YEAR) * 365 + date.get(Calendar.DAY_OF_YEAR);
+        final int dayOffset = daysInCurrentDate - daysInToday;
 
-        int month = c.get(Calendar.MONTH) + 1;
-        int day = c.get(Calendar.DATE);
-        String dayOfWeekStr = c.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
+        final int month = date.get(Calendar.MONTH) + 1;
+        final int day = date.get(Calendar.DATE);
+        final String dayOfWeekStr = date.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
 
         if (dayOffset == 1)
             return String.format("내일(%d월 %d일 %s)", month, day, dayOfWeekStr);
         else if (dayOffset == 2)
             return String.format("모레(%d월 %d일 %s)", month, day, dayOfWeekStr);
         else
-            return null;
+            return "";
     }
 }

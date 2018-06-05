@@ -372,12 +372,15 @@ public class BusFragment extends Fragment {
 
         int currentDayOffset = 1;
         for (BusTimeModel busTime : busStationModels.get(index).departureTimes) {
-            mLvAdapter.listItems.add(new BusTimeListBusTime(busTime));
-
+            //새로운 날짜를 시작할 때 구분자 추가
             if (busTime.getAbsoluteSeconds() > currentDayOffset * 86400) {
-                mLvAdapter.listItems.add(new BusTimeListDaySeparator(currentDayOffset));
+                Calendar date = Calendar.getInstance();
+                date.add(Calendar.DATE, currentDayOffset);
+                mLvAdapter.listItems.add(new BusTimeListDaySeparator(date));
                 ++currentDayOffset;
             }
+
+            mLvAdapter.listItems.add(new BusTimeListBusTime(busTime));
         }
         mLvAdapter.notifyDataSetChanged();
 
@@ -585,10 +588,6 @@ public class BusFragment extends Fragment {
             else if (listItems.size() > 1 && listItems.get(0) instanceof BusTimeListText && current_hour >= 24) {
                 listItems.remove(0);
                 listItems.remove(0);
-
-                for (BusStationModel busStationModel : busStationModels) {
-                    busStationModel.updateHeader();
-                }
             }
 
             while (listItems.size() > 0 && listItems.get(0).hasExpired())

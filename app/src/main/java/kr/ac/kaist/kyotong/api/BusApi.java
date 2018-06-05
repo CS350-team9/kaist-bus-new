@@ -3,6 +3,7 @@ package kr.ac.kaist.kyotong.api;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -54,46 +55,28 @@ public class BusApi extends ApiBase {
          * SORT
          */
         sort(buses, busStationModels);
-
-        /**
-         * addHeader Info
-         */
-        addHeaderInBusStations(busStationModels);
-
     }
 
     private ArrayList<BusModel> createTodayBuses(int title_id) {
+        Calendar today = Calendar.getInstance();
+        if (DateUtils.beforeFourAM())
+            today.add(Calendar.DATE, -1);
 
-        boolean holiday;
-        if (DateUtils.beforeFourAM()) {
-            holiday = DateUtils.isHoliday(-1);
-            Log.d(TAG, "Today Bus by Yesterday");
-        } else {
-            holiday = DateUtils.isHoliday(0);
-            Log.d(TAG, "Today Bus by Today");
-        }
-
-        if (holiday) {
+        if (DateUtils.isHoliday(today))
             return createHolidayBuses(title_id);
-        } else {
+        else
             return createWeekdayBuses(title_id);
-        }
     }
 
     private ArrayList<BusModel> createTomorrowBuses(int title_id) {
+        Calendar tomorrow = Calendar.getInstance();
+        if (!DateUtils.beforeFourAM())
+            tomorrow.add(Calendar.DATE, 1);
 
-        boolean holiday;
-        if (DateUtils.beforeFourAM()) {
-            holiday = DateUtils.isHoliday(0);
-        } else {
-            holiday = DateUtils.isHoliday(1);
-        }
-
-        if (holiday) {
+        if (DateUtils.isHoliday(tomorrow))
             return createHolidayBuses(title_id);
-        } else {
+        else
             return createWeekdayBuses(title_id);
-        }
     }
 
     private void addBusTimeInBusStations(ArrayList<BusStationModel> busStationModels, ArrayList<BusModel> buses, boolean today) {
@@ -104,12 +87,6 @@ public class BusApi extends ApiBase {
                 }
                 busModel.getBusDepartureStation(i).addDepartureTime(busModel.getDepartureTime(i));
             }
-        }
-    }
-
-    private void addHeaderInBusStations(ArrayList<BusStationModel> busStaions) {
-        for (BusStationModel busStationModel : busStaions) {
-            busStationModel.addHeader();
         }
     }
 
@@ -469,9 +446,10 @@ public class BusApi extends ApiBase {
     }
 
     /**
-     * @param title_id
-     * @param busStationModels
-     * @return
+     * 주어진 노선의 공휴일 버스 일정을 생성한다.
+     *
+     * @param title_id 버스 노선을 나타내는 문자열의 ID
+     * @return 버스 일정
      */
     private ArrayList<BusModel> createHolidayBuses(int title_id) {
         ArrayList<BusModel> buses = new ArrayList<>();
@@ -488,8 +466,10 @@ public class BusApi extends ApiBase {
     }
 
     /**
-     * @param title_id
-     * @return
+     * 주어진 노선의 평일 버스 일정을 생성한다.
+     *
+     * @param title_id 버스 노선을 나타내는 문자열의 ID
+     * @return 버스 일정
      */
     private ArrayList<BusModel> createWeekdayBuses(int title_id) {
         ArrayList<BusModel> buses = new ArrayList<>();
