@@ -29,7 +29,7 @@
         <item name="actionBarStyle">@style/Theme.Bab.ActionBar</item>
     </style>
 
-    <style name="Theme.Bab.ActionBar" parent="style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+    <style name="Theme.Bab.ActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
         <item name="elevation">0dp</item>
     </style>
 

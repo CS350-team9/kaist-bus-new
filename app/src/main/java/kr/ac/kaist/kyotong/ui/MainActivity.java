@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.support.design.widget.TabLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,7 +20,6 @@ import android.view.animation.AnimationUtils;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.astuetz.PagerSlidingTabStrip;
 
 import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.ShuttleModel;
@@ -77,7 +77,7 @@ public class MainActivity extends ActivityBase {
     private ViewPager mViewPager;
     /** 메인 화면의 상단 툴바에 대한 참조 (버스 시간표를 화면 전체로 확장할 때 숨기기 위한 용도) */
     private View mActionbarView;
-    private PagerSlidingTabStrip tabs;
+    private TabLayout tabs;
     private Toolbar mToolbar;
 
     @Override
@@ -137,28 +137,23 @@ public class MainActivity extends ActivityBase {
         /**
          *
          */
-        tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-        tabs.setViewPager(mViewPager);
-        tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        tabs = findViewById(R.id.tabs);
+        tabs.setupWithViewPager(mViewPager);
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
+            public void onTabReselected(TabLayout.Tab tab) {}
 
             @Override
-            public void onPageSelected(int position) {
-
-                if (mSectionsPagerAdapter.shuttleModelArrayList.get(position).panelExpand) {
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (mSectionsPagerAdapter.shuttleModelArrayList.get(tab.getPosition()).panelExpand) {
                     hideActionBarAndTabs();
                 } else {
                     showActionbar();
                 }
-
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-            }
+            public void onTabUnselected(TabLayout.Tab tab) {}
         });
 
     }
@@ -355,9 +350,6 @@ public class MainActivity extends ActivityBase {
         UniversityModel universityModel = UniversityModel.newInstance(this, 1);
         mSectionsPagerAdapter.shuttleModelArrayList = universityModel.shuttleModels;
         mSectionsPagerAdapter.notifyDataSetChanged();
-        if (tabs != null) {
-            tabs.notifyDataSetChanged();
-        }
 
         /**
          *
