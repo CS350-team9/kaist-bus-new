@@ -23,7 +23,8 @@ public class BusTimeListBusTime extends BusTimeListItem {
     ) {
         headerTextView.setVisibility(View.GONE);
         contentView.setVisibility(View.VISIBLE);
-        timeTextView.setText(busTime.getTimeStr());
+        String timeStr = String.format("%02d:%02d", busTime.getHours(), busTime.getMinutes());
+        timeTextView.setText(timeStr);
         remainingTimeTextView.setVisibility(View.VISIBLE);
         remainingTimeTextView.setText(getLeftTimeString());
     }

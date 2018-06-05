@@ -62,14 +62,9 @@ public class BusTimeModel {
         setTime(hours, minutes, 0);
     }
 
-    /**
-     * 시간을 HH:MM 형태로 나타낸 문자열을 리턴한다.
-     *
-     * @return 현재 시각을 나타낸 문자열
-     */
-    public String getTimeStr() {
-        return String.format("%02d:%02d", hours, minutes);
-    }
+    public int getHours() { return hours; }
+    public int getMinutes() { return minutes; }
+    public int getSeconds() { return seconds; }
 
     /**
      * 현재 시각에 주어진 시간(분 단위)를 더한다. (음수도 허용)
