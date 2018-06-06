@@ -502,13 +502,13 @@ public class BusApi extends ApiBase {
         BusTimeModel visitTime = new BusTimeModel(date, baseHours, baseMinutes, 0);
 
         //첫 정거장 추가
-        bus.addNextStation(busStationModels.get(offset), visitTime.clone());
+        bus.addNextStation(busStationModels.get(offset), visitTime);
 
         //이후의 정거장 추가
         for (int deltaMin : deltaMinutes) {
             offset = (offset + 1) % busStationModels.size();
-            visitTime.addTime(0, deltaMin, 0);
-            bus.addNextStation(busStationModels.get(offset), visitTime.clone());
+            visitTime = visitTime.addTime(0, deltaMin, 0);
+            bus.addNextStation(busStationModels.get(offset), visitTime);
         }
 
         return bus;

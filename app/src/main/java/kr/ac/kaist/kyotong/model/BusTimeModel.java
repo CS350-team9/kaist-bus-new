@@ -6,12 +6,12 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * 한 정거장에 대한 하나의 버스의 도착 시간을 나타내는 클래스.
+ * 한 정거장에 대한 하나의 버스의 도착 시간을 나타내는 클래스. 주의: Immutable한 클래스이다
  */
 public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
     private static final String TAG = BusTimeModel.class.getName();
 
-    private Calendar time = null;
+    private Calendar time;
 
     /**
      * 주어진 시각을 바탕으로 버스 출발/도착 시각을 생성한다.
@@ -37,19 +37,6 @@ public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
      */
     public long getAbsoluteSeconds() {
         return time.getTimeInMillis() / 1000;
-    }
-
-    /**
-     * 이 객체가 가리키는 시각을 설정한다.
-     *
-     * @param hours   시
-     * @param minutes 분
-     * @param seconds 초
-     */
-    public void setTime(int hours, int minutes, int seconds) {
-        time.set(Calendar.HOUR_OF_DAY, hours);
-        time.set(Calendar.MINUTE, minutes);
-        time.set(Calendar.SECOND, seconds);
     }
 
     public int getHours() {
@@ -78,16 +65,19 @@ public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
     }
 
     /**
-     * 현재 시각에 주어진 시간을 더한다. 음수나 범위를 초과한 값도 허용된다.
+     * 현재 시각에 주어진 시간을 더한 시각을 나타낸 객체를 생성하여 돌려준다. 음수나 범위를 초과한 값도 허용된다.
      *
      * @param hours 시
      * @param minutes 분
      * @param seconds 초
+     * @return 주어진 시간 값을 더한 사본
      */
-    public void addTime(int hours, int minutes, int seconds) {
-        time.add(Calendar.HOUR_OF_DAY, hours);
-        time.add(Calendar.MINUTE, minutes);
-        time.add(Calendar.SECOND, seconds);
+    public BusTimeModel addTime(int hours, int minutes, int seconds) {
+        BusTimeModel newTime = clone();
+        newTime.time.add(Calendar.HOUR_OF_DAY, hours);
+        newTime.time.add(Calendar.MINUTE, minutes);
+        newTime.time.add(Calendar.SECOND, seconds);
+        return newTime;
     }
 
     @Override
