@@ -103,7 +103,7 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         };
 
         int mainContentHeight = SizeUtils.getMainContentHeight(getContext());
-        final int stationIconRadius = (int) (((float) mainContentHeight) * 0.06f);
+        final int stationIconRadius = (int) (((float) mainContentHeight) * 0.08f);
 
         //정거장 아이콘 수가 부족하면 추가
         while (stationIcons.size() < stations.size()) {
