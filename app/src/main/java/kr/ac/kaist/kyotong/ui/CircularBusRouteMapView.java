@@ -15,6 +15,7 @@ import android.util.Log;
 import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusModel;
+import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
 import kr.ac.kaist.kyotong.utils.ViewIdGenerator;
 
@@ -144,11 +145,8 @@ public class CircularBusRouteMapView extends ConstraintLayout {
     /**
      * 버스 아이콘의 위치를 새로고침한다.
      * @param buses 모든 버스의 목록
-     * @param hours 현재 시간
-     * @param minutes 현재 분
-     * @param seconds 현재 초
      */
-    public void updateBuses(ArrayList<BusModel> buses, int hours, int minutes, int seconds) {
+    public void updateBuses(ArrayList<BusModel> buses) {
         if (centerCircle == null) {
             Log.w("updateBuses", "missing centerCircle");
             centerCircle = findViewById(R.id.circular_bus_route_circle);
@@ -162,7 +160,7 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         ArrayList<BusModel> activeBuses     = new ArrayList<>();
         ArrayList<Float>    activeBusAngles = new ArrayList<>();
         for (BusModel bus : buses) {
-            int busAngle = bus.getLocation(hours, minutes, seconds);
+            int busAngle = bus.getAngle(BusTimeModel.getCurrentTime());
             if (busAngle != -1) {
                 activeBuses.add(bus);
                 activeBusAngles.add(busAngle / 360.0f);

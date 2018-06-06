@@ -3,25 +3,17 @@ package kr.ac.kaist.kyotong.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
-import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -34,11 +26,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -50,10 +40,7 @@ import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.BusModel;
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
-import kr.ac.kaist.kyotong.utils.LocationCoordinates;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
-
-import kr.ac.kaist.kyotong.ui.CircularBusRouteMapView;
 
 import kr.ac.kaist.kyotong.api.BusApi;
 import kr.ac.kaist.kyotong.utils.MapManager;
@@ -69,7 +56,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 /**
  * 메인 화면의 버스 노선 탭에 대응하는 노선도를 표시하는 Fragment
  */
-public class BusFragment extends Fragment implements OnMapReadyCallback {
+public class BusFragment extends Fragment {
 
     /**
      * The fragment argument representing the section number for this
@@ -136,6 +123,7 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
     //TODO Google Map 관련 코드
     private MapView mapView = null;
     private Marker lastClicked = null;
+    private GoogleMap googleMap = null;
 
 
     /**
@@ -267,8 +255,15 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 //        });
 
         mapView = rootView.findViewById(R.id.mapView);
+        mapView.setVisibility(View.INVISIBLE);
         mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this);
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                BusFragment.this.googleMap = googleMap;
+                initializeGoogleMap();
+            }
+        });
 
         /**
          *
@@ -395,9 +390,6 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
         mLvAdapter.busTimeModels.addAll(busStationModels.get(index).departureTimes);
         mLvAdapter.notifyDataSetChanged();
 
-        for (BusTimeModel busTimeModel : mLvAdapter.busTimeModels) {
-            Log.d(TAG, "time_str -> " + busTimeModel.time_str + ", header -> " + busTimeModel.header);
-        }
         mNameTv.setText(busStationModel.name_full);
 
         /**
@@ -474,7 +466,7 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 
                 handler.post(new Runnable() {
                                  public void run() {
-                                     circularBusRouteMapView.updateBuses(buses, current_hour, current_minute, current_second);
+                                     circularBusRouteMapView.updateBuses(buses);
 
                                      mLvAdapter.notifyDataSetChanged();
                                      if (mShowErrorView && !mUpdateStationRunning && mBusApiTask == null) {
@@ -581,22 +573,25 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
              * Data Import and export
 			 */
 
-            if (busTimeModel.header != null) {
+            if (busTimeModel.isDivider()) {
                 viewHolder.mContentView.setVisibility(View.GONE);
                 viewHolder.mHeaderTv.setVisibility(View.VISIBLE);
-                viewHolder.mHeaderTv.setText(busTimeModel.header);
-                viewHolder.mHeaderTv.setTextColor(busTimeModel.header_textColor);
+                viewHolder.mHeaderTv.setText(busTimeModel.getHeaderStr());
+                int headerTextColor = 0xFF8A8A8A;
+                if (busTimeModel.isHoliday())
+                    headerTextColor = 0xFFF44336;
+                viewHolder.mHeaderTv.setTextColor(headerTextColor);
 
             } else {
                 viewHolder.mContentView.setVisibility(View.VISIBLE);
                 viewHolder.mHeaderTv.setVisibility(View.GONE);
 
-                if (busTimeModel.indicator == null) {
-                    viewHolder.mTimeTv.setText(busTimeModel.time_str);
+                if (!busTimeModel.isIndicator()) {
+                    viewHolder.mTimeTv.setText(busTimeModel.getTimeStr());
                     viewHolder.mLeftTv.setVisibility(View.VISIBLE);
-                    viewHolder.mLeftTv.setText(busTimeModel.left_time_str);
+                    viewHolder.mLeftTv.setText(busTimeModel.getLeftTimeString());
                 } else {
-                    viewHolder.mTimeTv.setText(busTimeModel.indicator);
+                    viewHolder.mTimeTv.setText(busTimeModel.getIndicatorString());
                     viewHolder.mLeftTv.setVisibility(View.GONE);
                 }
             }
@@ -618,19 +613,7 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
         }
 
         private void updateLeftTimeStrInTickets() {
-
-            /**
-             *
-             */
-            for (BusTimeModel busTimeModel : busTimeModels) {
-                if (busTimeModel.header != null) {
-                    continue;
-                }
-                busTimeModel.updateLeftTimeStr(current_hour, current_minute, current_second);
-            }
-
-            if ((busTimeModels.size() > 1) && (busTimeModels.get(0).indicator != null)
-                    && (current_hour >= 24)) {
+            if (busTimeModels.size() > 1 && busTimeModels.get(0).isIndicator() && current_hour >= 24) {
                 busTimeModels.remove(0);
                 busTimeModels.remove(0);
 
@@ -639,15 +622,12 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
 
-            while ((busTimeModels.size() > 0)
-                    && (busTimeModels.get(0).left_time_str != null)
-                    && (busTimeModels.get(0).left_time_str.equals(" - "))) {
+            while (busTimeModels.size() > 0 && busTimeModels.get(0).isOverdue())
                 busTimeModels.remove(0);
-            }
 
-            if ((busTimeModels.size() > 0) && (busTimeModels.get(0).header != null)) {
+            if (busTimeModels.size() > 0 && busTimeModels.get(0).isDivider()) {
                 BusTimeModel busTimeModel = new BusTimeModel();
-                busTimeModel.indicator = "당일 버스 운행은 종료되었습니다";
+                busTimeModel.setIndicatorString("당일 버스 운행은 종료되었습니다");
                 busTimeModels.add(0, busTimeModel);
             }
         }
@@ -715,9 +695,9 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
         super.onLowMemory();
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        final BusApi busApi = new BusApi(R.string.tab_kaist_olev);
+
+    public void initializeGoogleMap() {
+        final BusApi busApi = new BusApi(R.string.tab_kaist_wolpyeong);
 
         final ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
 
@@ -727,8 +707,8 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
         for (int i = 0; i < busStationModels.size(); i++) {
             BusStationModel bm = busStationModels.get(i);
             // marker at stations;
-            Location loc = bm.location;
-            LatLng thisStation = new LatLng(loc.getLatitude(), loc.getLongitude());
+            LatLng loc = bm.location;
+            LatLng thisStation = new LatLng(loc.latitude, loc.longitude);
             builder.include(thisStation);
 
             if (i != busStationModels.size() - 1) {
@@ -740,12 +720,12 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
             }
 
             // polyline at path
-            ArrayList<LatLng> pointsOnPathToNextStation = locationCoordToLatLng(bm.pointsOnPathToNextStation);
+            ArrayList<LatLng> pointsOnPathToNextStation = (ArrayList<LatLng>) bm.pointsOnPathToNextStation.clone();
 
             pointsOnPathToNextStation.add(0, thisStation);
             if (i < busStationModels.size() - 1) {
-                pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(busStationModels.get(i+1).location.getLatitude(),
-                        busStationModels.get(i+1).location.getLongitude()));
+                pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(busStationModels.get(i+1).location.latitude,
+                        busStationModels.get(i+1).location.longitude));
             }
             PolylineOptions polylineOptions = new PolylineOptions();
             polylineOptions.color(Color.RED);
@@ -773,14 +753,6 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-    }
-
-    public ArrayList<LatLng> locationCoordToLatLng(ArrayList<LocationCoordinates> pointsOnPathToNextStation) {
-        ArrayList<LatLng> res = new ArrayList<>();
-        for (LocationCoordinates lc : pointsOnPathToNextStation) {
-            res.add(new LatLng(lc.latitude, lc.longitude));
-        }
-        return res;
     }
 }
 
