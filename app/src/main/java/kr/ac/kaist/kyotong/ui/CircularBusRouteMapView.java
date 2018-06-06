@@ -54,7 +54,7 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         centerCircle        = findViewById(R.id.circular_bus_route_circle);
     }
 
-    public static interface OnStationClickListener {
+    public interface OnStationClickListener {
         void onStationClick(int stationIndex);
     }
 
@@ -177,13 +177,13 @@ public class CircularBusRouteMapView extends ConstraintLayout {
             }
         }
 
-        int busIconWidth = SizeUtils.dpToPixels(getContext(), 10.0f);
+        int busIconSize = SizeUtils.dpToPixels(getContext(), 10.0f);
 
         while (busIcons.size() < activeBuses.size()) {
             View busIcon = new View(getContext());
             busIcon.setId(ViewIdGenerator.generateViewId());
             busIcon.setBackgroundResource(R.drawable.bus_fragment_bus);
-            busIcon.setLayoutParams(new FrameLayout.LayoutParams(busIconWidth, busIconWidth));
+            busIcon.setLayoutParams(new FrameLayout.LayoutParams(busIconSize, busIconSize));
             busIcons.add(busIcon);
             addView(busIcon);
         }
