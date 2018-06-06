@@ -106,7 +106,7 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         final int stationIconRadius = (int) (((float) mainContentHeight) * 0.08f);
 
         //정거장 아이콘 수가 부족하면 추가
-        while (stationIcons.size() < stations.size()) {
+        while (stationIcons.size() < stations.size() - 1) {
             View stationIcon = new View(getContext());
             stationIcon.setId(ViewIdGenerator.generateViewId());
             stationIcon.setBackgroundResource(R.drawable.bus_fragment_station);
@@ -128,13 +128,13 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         }
 
         //정거장 아이콘 수가 너무 많으면 삭제
-        while (stationIcons.size() > stations.size()) {
+        while (stationIcons.size() > stations.size() - 1) {
             removeView(stationIcons.remove(stationIcons.size() - 1));
             removeView(stationNameViews.remove(stationNameViews.size() - 1));
         }
 
         //정거장 이름표의 텍스트 설정
-        for (int i = 0; i < stations.size(); ++i)
+        for (int i = 0; i < stations.size() - 1; ++i)
             stationNameViews.get(i).setText(stations.get(i).getName());
 
         int centerCircleRadius      = centerCircle.getWidth() / 2;
@@ -143,7 +143,7 @@ public class CircularBusRouteMapView extends ConstraintLayout {
 
         ConstraintSet constraints = new ConstraintSet();
         constraints.clone(this);
-        for (int i = 0; i < stations.size(); ++i) {
+        for (int i = 0; i < stations.size() - 1; ++i) {
             float stationAngle = (float) (stations.get(i).getDegree());
             constraints.constrainCircle(stationIcons.get(i).getId(), getId(), stationIconOffset, stationAngle);
             int stationNameViewAdjustment = (int) Math.round(
