@@ -3,6 +3,8 @@ package kr.ac.kaist.kyotong.ui;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.Calendar;
+
 import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.DateUtils;
 
@@ -16,7 +18,9 @@ public class BusTimeListBusTime extends BusTimeListItem {
         this.busTime = busTime;
     }
 
+    @Override
     public void updateListItemView(
+            Calendar now,
             TextView headerTextView,
             View contentView,
             TextView timeTextView,
@@ -27,7 +31,7 @@ public class BusTimeListBusTime extends BusTimeListItem {
         String timeStr = String.format("%02d:%02d", busTime.getHours(), busTime.getMinutes());
         timeTextView.setText(timeStr);
         remainingTimeTextView.setVisibility(View.VISIBLE);
-        remainingTimeTextView.setText(getLeftTimeString());
+        remainingTimeTextView.setText(getLeftTimeString(now));
     }
 
 
@@ -37,8 +41,8 @@ public class BusTimeListBusTime extends BusTimeListItem {
      * @return
      */
     @Override
-    public boolean hasExpired() {
-        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - DateUtils.getCurrentAbsoluteSeconds();
+    public boolean hasExpired(Calendar now) {
+        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - DateUtils.toAbsoluteSeconds(now);
 
         return deltaTotalSeconds < -60;
     }
@@ -49,10 +53,11 @@ public class BusTimeListBusTime extends BusTimeListItem {
      * <p>버스 도착 시각이 {@code currentTime}보다 과거일 경우 이미 떠난 버스이다.<br>
      * 버스 도착 시각이 {@code currentTime}보다 미래일 경우 아직 도착하지 않은 버스이다.</p>
      *
+     * @param now 현재 시각
      * @return 버스의 도착 여부 또는 남은 시간을 나타낸 문자열
      */
-    private String getLeftTimeString() {
-        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - DateUtils.getCurrentAbsoluteSeconds();
+    private String getLeftTimeString(Calendar now) {
+        long deltaTotalSeconds = busTime.getAbsoluteSeconds() - DateUtils.toAbsoluteSeconds(now);
 
         if (deltaTotalSeconds < -60)
             return " - ";

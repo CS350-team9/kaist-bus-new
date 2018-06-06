@@ -19,10 +19,16 @@ public class BusTimeListDaySeparator extends BusTimeListItem {
 
     public BusTimeListDaySeparator(Calendar date) {
         this.date = (Calendar) date.clone();
+        this.date.set(Calendar.HOUR_OF_DAY, 0);
+        this.date.set(Calendar.MINUTE, 0);
+        this.date.set(Calendar.SECOND, 0);
+        this.date.set(Calendar.MILLISECOND, 0);
         relatedListItems = new ArrayList<>();
     }
 
+    @Override
     public void updateListItemView(
+            Calendar now,
             TextView headerTextView,
             View contentView,
             TextView timeTextView,
@@ -30,7 +36,7 @@ public class BusTimeListDaySeparator extends BusTimeListItem {
     ) {
         contentView.setVisibility(View.GONE);
         headerTextView.setVisibility(View.VISIBLE);
-        headerTextView.setText(getHeaderStr());
+        headerTextView.setText(getHeaderStr(now));
 
         int headerColor = 0xFF8A8A8A;
         if (DateUtils.isHoliday(date))
@@ -43,10 +49,14 @@ public class BusTimeListDaySeparator extends BusTimeListItem {
      *
      * @return 헤더 문자열
      */
-    private String getHeaderStr() {
-        final long daysInToday = Calendar.getInstance().getTimeInMillis() / (1000 * 60 * 60 * 24);
-        final long daysInCurrentDate = date.getTimeInMillis() / (1000 * 60 * 60 * 24);
-        final long dayOffset = daysInCurrentDate - daysInToday;
+    private String getHeaderStr(Calendar now) {
+        now = (Calendar) now.clone();
+        now.set(Calendar.HOUR_OF_DAY, 0);
+        now.set(Calendar.MINUTE, 0);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
+
+        long dayOffset = (date.getTimeInMillis() - now.getTimeInMillis()) / (1000 * 60 * 60 * 24);
 
         final String dayOffsetStr;
         if (dayOffset == -1)
@@ -70,23 +80,21 @@ public class BusTimeListDaySeparator extends BusTimeListItem {
     }
 
     @Override
-    public boolean hasExpired() {
-        // 구분자 자신의 날짜가 아직 만료되지 않았을 경우
-        if (DateUtils.toAbsoluteDays(date) >= DateUtils.toAbsoluteDays(Calendar.getInstance()))
-            return false;
-
-        //구분자가 참조하는 날짜가 아직 만료되지 않았을 경우
+    public boolean hasExpired(Calendar now) {
+        //참조하는 다른 목록 객체 중 만료된 것들을 제거한다
         for (int i = 0; i < relatedListItems.size(); ++i) {
-            if (relatedListItems.get(i).hasExpired()) {
+            if (relatedListItems.get(i).hasExpired(now)) {
                 //이미 만료된 객체는 더 이상 참조할 필요가 없다
                 relatedListItems.remove(i);
                 --i;
             }
-            else
-                return false;
         }
 
-        return true;
+        // 구분자 자신의 날짜가 아직 만료되지 않았을 경우
+        if (DateUtils.compareDays(date, now) >= 0)
+            return false;
+
+        return relatedListItems.size() == 0;
     }
 
     /**

@@ -12,7 +12,7 @@ import kr.ac.kaist.kyotong.utils.DateUtils;
  */
 public class BusTimeListText extends BusTimeListItem {
     private String text = null;
-    private long expirationAbsoluteDays;
+    private Calendar expirationDate = null;
 
     /**
      * 새로운 텍스트 항목을 만든다
@@ -22,13 +22,13 @@ public class BusTimeListText extends BusTimeListItem {
      */
     public BusTimeListText(Calendar expirationDate, String text) {
         this.text = text;
-        if (expirationDate == null)
-            expirationAbsoluteDays = -1;
-        else
-            expirationAbsoluteDays = DateUtils.toAbsoluteDays(expirationDate);
+        if (expirationDate != null)
+            this.expirationDate = (Calendar) expirationDate.clone();
     }
 
+    @Override
     public void updateListItemView(
+            Calendar now,
             TextView headerTextView,
             View contentView,
             TextView timeTextView,
@@ -41,10 +41,10 @@ public class BusTimeListText extends BusTimeListItem {
     }
 
     @Override
-    public boolean hasExpired() {
-        if (expirationAbsoluteDays == -1)
+    public boolean hasExpired(Calendar now) {
+        if (expirationDate == null)
             return false;
         else
-            return expirationAbsoluteDays < DateUtils.toAbsoluteDays(Calendar.getInstance());
+            return DateUtils.compareDays(expirationDate, now) < 0;
     }
 }

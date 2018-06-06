@@ -385,7 +385,7 @@ public class BusFragment extends Fragment {
         //구분자의 날짜가 버스 시간보다 더 미래일 경우 구분자의 날짜를 버스 시간과 같게 함
         if (busTimes.size() > 0) {
             Calendar firstBusTimeValue = busTimes.get(0).getTime();
-            if (DateUtils.toAbsoluteDays(beginDate) > DateUtils.toAbsoluteDays(firstBusTimeValue))
+            if (DateUtils.compareDays(beginDate, firstBusTimeValue) > 0)
                 beginDate = firstBusTimeValue;
         }
 
@@ -463,7 +463,7 @@ public class BusFragment extends Fragment {
 
         for (BusTimeModel busTime : busTimes) {
             //새로운 날짜를 시작함
-            while (DateUtils.toAbsoluteDays(date) < DateUtils.toAbsoluteDays(busTime.getTime())) {
+            while (DateUtils.compareDays(date, busTime.getTime()) < 0) {
                 date = (Calendar) date.clone();
                 date.add(Calendar.DATE, 1);
                 currentList = new ArrayList<>();
@@ -510,7 +510,7 @@ public class BusFragment extends Fragment {
                 current_second = absolute_second % 60;
                 show_colon = !show_colon;
 
-                mLvAdapter.updateBusTimeListItems();
+                mLvAdapter.updateBusTimeListItems(c);
 
                 handler.post(new Runnable() {
                                  public void run() {
@@ -613,6 +613,7 @@ public class BusFragment extends Fragment {
             }
 
             this.getItem(position).updateListItemView(
+                    Calendar.getInstance(),
                     headerTextView,
                     contentView,
                     timeTextView,
@@ -627,9 +628,9 @@ public class BusFragment extends Fragment {
             return false;
         }
 
-        private void updateBusTimeListItems() {
+        private void updateBusTimeListItems(Calendar now) {
             for (int i = 0; i < listItems.size(); ++i) {
-                if (listItems.get(i).hasExpired()) {
+                if (listItems.get(i).hasExpired(now)) {
                     listItems.remove(i);
                     --i;
                 }
