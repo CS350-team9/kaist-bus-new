@@ -509,6 +509,10 @@ public class BusApi extends ApiBase {
             offset = (offset + 1) % busStationModels.size();
             visitTime = visitTime.addTime(0, deltaMin, 0);
             bus.addNextStation(busStationModels.get(offset), visitTime);
+            Log.d(TAG, String.format("Added %02d:%02d to station %s",
+                    visitTime.getHours(),
+                    visitTime.getMinutes(),
+                    busStationModels.get(offset).getFullName()));
         }
 
         return bus;

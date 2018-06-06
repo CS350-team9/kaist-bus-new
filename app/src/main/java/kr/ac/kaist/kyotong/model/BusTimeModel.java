@@ -83,7 +83,9 @@ public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
     @Override
     public BusTimeModel clone() {
         try {
-            return (BusTimeModel) super.clone();
+            BusTimeModel newTime = (BusTimeModel) super.clone();
+            newTime.time = (Calendar) time.clone();
+            return newTime;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
