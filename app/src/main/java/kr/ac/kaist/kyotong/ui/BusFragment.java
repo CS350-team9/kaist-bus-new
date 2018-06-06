@@ -29,14 +29,17 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 
 import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.BusModel;
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
+import kr.ac.kaist.kyotong.utils.DateUtils;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
 
 import kr.ac.kaist.kyotong.api.BusApi;
@@ -373,19 +376,45 @@ public class BusFragment extends Fragment {
         //기존의 버스 시간표를 지우고 새로운 시간표를 생성한다.
         mLvAdapter.listItems.clear();
 
-        int currentDayOfYear = -1;
-        for (int i = 0; i < busStationModel.getVisitingBusCount(); ++i) {
-            BusTimeModel busTime = busStationModel.getVisitTime(i);
+        ArrayList<BusTimeModel> busTimes = busStationModel.getVisitTimes();
 
-            //새로운 날짜를 시작할 때 구분자 추가
-            final int dayOfYear = busTime.getDayOfYear();
-            if (dayOfYear != currentDayOfYear) {
-                currentDayOfYear = dayOfYear;
-                mLvAdapter.listItems.add(new BusTimeListDaySeparator(busTime.getTime()));
-            }
+        //구분자를 생성하기 위한 날짜
+        Calendar beginDate = Calendar.getInstance();
 
-            mLvAdapter.listItems.add(new BusTimeListBusTime(busTime));
+        //구분자의 날짜가 버스 시간보다 더 미래일 경우 구분자의 날짜를 버스 시간과 같게 함
+        if (busTimes.size() > 0) {
+            Calendar firstBusTimeValue = busTimes.get(0).getTime();
+            if (DateUtils.toAbsoluteDays(beginDate) > DateUtils.toAbsoluteDays(firstBusTimeValue))
+                beginDate = firstBusTimeValue;
         }
+
+        //버스 도착 시간을 날짜별로 묶는다
+        TreeMap<Calendar, ArrayList<BusTimeModel>> busTimesByDay = groupBusTimes(busTimes, beginDate);
+
+        //첫 구분자 추가
+        for (TreeMap.Entry<Calendar, ArrayList<BusTimeModel>> entry : busTimesByDay.entrySet()) {
+            Calendar date = entry.getKey();
+            BusTimeListDaySeparator header = new BusTimeListDaySeparator(date);
+            mLvAdapter.listItems.add(header);
+
+            ArrayList<BusTimeModel> busTimesInDay = entry.getValue();
+            if (busTimesInDay.isEmpty()) {
+                BusTimeListText textItem = new BusTimeListText(date, "주말 및 공휴일은 운행하지 않습니다");
+                mLvAdapter.listItems.add(textItem);
+
+                header.addRelatedListItem(textItem);
+            }
+            else {
+                for (BusTimeModel busTime : busTimesInDay) {
+                    BusTimeListBusTime busTimeListItem = new BusTimeListBusTime(busTime);
+                    mLvAdapter.listItems.add(busTimeListItem);
+
+                    //구분자 객체가 버스 시각 목록 객체를 참조함으로서 자신이 언제 삭제되어야 할지 확인할 수 있게 한다
+                    header.addRelatedListItem(busTimeListItem);
+                }
+            }
+        }
+
         mLvAdapter.notifyDataSetChanged();
 
         mNameTv.setText(busStationModel.getFullName());
@@ -418,6 +447,32 @@ public class BusFragment extends Fragment {
 
         mUpdateStationRunning = false;
 
+    }
+
+    /**
+     * 버스 도착 시간 목록을 날짜별로 묶어서 돌려준다.
+     * @param busTimes
+     * @return (날짜) => (날짜에 해당하는 버스 시간 목록)
+     */
+    private static TreeMap<Calendar, ArrayList<BusTimeModel>> groupBusTimes(ArrayList<BusTimeModel> busTimes, Calendar beginDate) {
+        Calendar date = (Calendar) beginDate.clone();
+        TreeMap<Calendar, ArrayList<BusTimeModel>> busTimesByDay = new TreeMap<>();
+        ArrayList<BusTimeModel> currentList = new ArrayList<>();
+        busTimesByDay.put(date, currentList);
+
+        for (BusTimeModel busTime : busTimes) {
+            //새로운 날짜를 시작함
+            while (DateUtils.toAbsoluteDays(date) < DateUtils.toAbsoluteDays(busTime.getTime())) {
+                date = (Calendar) date.clone();
+                date.add(Calendar.DATE, 1);
+                currentList = new ArrayList<>();
+                busTimesByDay.put(date, currentList);
+            }
+
+            currentList.add(busTime);
+        }
+
+        return busTimesByDay;
     }
 
 
@@ -572,19 +627,23 @@ public class BusFragment extends Fragment {
         }
 
         private void updateBusTimeListItems() {
-            if (listItems.isEmpty()) {
-                listItems.add(new BusTimeListText("주말 및 공휴일은 운행하지 않습니다"));
-            }
-            else if (listItems.size() > 1 && listItems.get(0) instanceof BusTimeListText && current_hour >= 24) {
-                listItems.remove(0);
-                listItems.remove(0);
+            for (int i = 0; i < listItems.size(); ++i) {
+                if (listItems.get(i).hasExpired()) {
+                    listItems.remove(i);
+                    --i;
+                }
             }
 
-            while (listItems.size() > 0 && listItems.get(0).hasExpired())
-                listItems.remove(0);
-
-            if (listItems.size() > 0 && listItems.get(0) instanceof BusTimeListDaySeparator) {
-                listItems.add(0, new BusTimeListText("당일 버스 운행은 종료되었습니다"));
+            for (int i = 0; i < listItems.size(); ++i) {
+                BusTimeListItem listItem = listItems.get(i);
+                if (listItem instanceof BusTimeListDaySeparator) {
+                    BusTimeListDaySeparator separator = (BusTimeListDaySeparator) listItem;
+                    if (separator.hasNoRelatedItem()) {
+                        BusTimeListText noMoreBusText = new BusTimeListText(separator.getTime(), "당일 버스 운행은 종료되었습니다");
+                        listItems.add(i++, noMoreBusText);
+                        separator.addRelatedListItem(noMoreBusText);
+                    }
+                }
             }
         }
     }

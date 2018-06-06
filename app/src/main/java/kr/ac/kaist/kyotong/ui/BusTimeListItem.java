@@ -25,7 +25,7 @@ public abstract class BusTimeListItem {
     /**
      * 이 리스트 항목이 만료되어 삭제해야 할 경우 true를, 아니라면 false를 반환한다.
      *
-     * @return
+     * @return 만료 여부
      */
-    public boolean hasExpired() { return false; }
+    public abstract boolean hasExpired();
 }

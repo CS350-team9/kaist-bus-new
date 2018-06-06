@@ -3,6 +3,7 @@ package kr.ac.kaist.kyotong.ui;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -14,9 +15,11 @@ import kr.ac.kaist.kyotong.utils.DateUtils;
 public class BusTimeListDaySeparator extends BusTimeListItem {
     /** 이 구분자가 표시할 기준 날짜 */
     private Calendar date;
+    private ArrayList<BusTimeListItem> relatedListItems;
 
     public BusTimeListDaySeparator(Calendar date) {
         this.date = (Calendar) date.clone();
+        relatedListItems = new ArrayList<>();
     }
 
     public void updateListItemView(
@@ -64,5 +67,50 @@ public class BusTimeListDaySeparator extends BusTimeListItem {
         final String dayOfWeekStr = date.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault());
 
         return String.format("%s(%d월 %d일 %s)", dayOffsetStr, month, day, dayOfWeekStr);
+    }
+
+    @Override
+    public boolean hasExpired() {
+        // 구분자 자신의 날짜가 아직 만료되지 않았을 경우
+        if (DateUtils.toAbsoluteDays(date) >= DateUtils.toAbsoluteDays(Calendar.getInstance()))
+            return false;
+
+        //구분자가 참조하는 날짜가 아직 만료되지 않았을 경우
+        for (int i = 0; i < relatedListItems.size(); ++i) {
+            if (relatedListItems.get(i).hasExpired()) {
+                //이미 만료된 객체는 더 이상 참조할 필요가 없다
+                relatedListItems.remove(i);
+                --i;
+            }
+            else
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 이 구분자가 관리하는 버스 시간표 목록 객체에 다른 BusTimeListItem을 추가한다.
+     */
+    public void addRelatedListItem(BusTimeListItem listItem) {
+        relatedListItems.add(listItem);
+    }
+
+    /**
+     * 이 구분자가 관리하는 다른 목록 객체가 없으면 true, 있으면 false를 돌려준다.
+     *
+     * @return 관리하는 목록 객체의 존재 여부
+     */
+    public boolean hasNoRelatedItem() {
+        return relatedListItems.isEmpty();
+    }
+
+    /**
+     * 이 구분자가 표시하는 날짜의 사본을 돌려준다. (시, 분, 초는 0이 아닐 수 있음)
+     *
+     * @return 날짜를 가리키는 객체
+     */
+    public Calendar getTime() {
+        return (Calendar) date.clone();
     }
 }

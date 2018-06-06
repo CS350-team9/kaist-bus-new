@@ -2,6 +2,7 @@ package kr.ac.kaist.kyotong.model;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -18,12 +19,8 @@ public class BusStationModel {
         return imgResource;
     }
 
-    public BusTimeModel getVisitTime(int index) {
-        return visitTimes.get(index);
-    }
-
-    public int getVisitingBusCount() {
-        return visitTimes.size();
+    public ArrayList<BusTimeModel> getVisitTimes() {
+        return (ArrayList<BusTimeModel>) visitTimes.clone();
     }
 
     public LatLng getCoordinates() {
