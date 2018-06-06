@@ -46,6 +46,10 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
 
         <!-- TEST -->
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCvYZOIxBsCK2PqDLkxPQL2do-x3Y2fonw"/>
     </application>
 
 </manifest>

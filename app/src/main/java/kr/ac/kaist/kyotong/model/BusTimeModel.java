@@ -1,110 +1,98 @@
 package kr.ac.kaist.kyotong.model;
 
+import android.support.annotation.NonNull;
+
+import java.util.Calendar;
+import java.util.Date;
+
 /**
- * Created by yearnning on 2014. 9. 12..
- * <br>한 정거장에 대한 하나의 버스의 도착 시간을 나타내는 클래스.
+ * 한 정거장에 대한 하나의 버스의 도착 시간을 나타내는 클래스. 주의: Immutable한 클래스이다
  */
-public class BusTimeModel {
+public class BusTimeModel implements Cloneable, Comparable<BusTimeModel> {
+    private static final String TAG = BusTimeModel.class.getName();
 
-    private static final String TAG = "Ticket";
-
-    /**
-     *
-     */
-    public String left_time_str = null;
-    public String time_str = null;
-    public String header = null;
-    public int header_textColor = 0xFF8A8A8A;
-    public String indicator = null;
+    private Calendar time;
 
     /**
+     * 주어진 시각을 바탕으로 버스 출발/도착 시각을 생성한다.
      *
+     * @param date 날짜 참고용 (시, 분, 초는 사용하지 않음). BusTimeModel은 이 객체를 clone()해서 사용한다.
+     * @param hours 시
+     * @param minutes 분
+     * @param seconds 초
      */
-    private int hour;
-    private int minute;
+    public BusTimeModel(Calendar date, int hours, int minutes, int seconds) {
+        time = (Calendar) date.clone();
+        time.setLenient(true);
+        time.set(Calendar.HOUR_OF_DAY, hours);
+        time.set(Calendar.MINUTE, minutes);
+        time.set(Calendar.SECOND, seconds);
+        time.set(Calendar.MILLISECOND, 0);
+    }
 
     /**
+     * 이 객체가 나타내는 유닉스 시각을 초 단위로 환산하여 돌려준다.
      *
+     * @return 초로 환산한 시각
      */
-    public void makeTomorrowBusTime() {
-        hour += 24;
+    public long getAbsoluteSeconds() {
+        return time.getTimeInMillis() / 1000;
     }
 
-    public int getAbsoluteSecond() {
-        return hour * 60 * 60 + minute * 60 ;
+    public int getHours() {
+        return time.get(Calendar.HOUR_OF_DAY);
     }
 
-    public void setTime(int hour, int minute) {
-
-        this.hour = hour;
-        this.minute = minute;
-
-        if (hour >= 24) {
-            hour -= 24;
-        }
-
-        time_str = String.format("%02d:%02d", hour, minute);
+    public int getMinutes() {
+        return time.get(Calendar.MINUTE);
     }
 
-    public void setTime(String time_str) {
-
-        /**
-         *
-         */
-        this.hour = Integer.parseInt(time_str.substring(0, 2));
-        this.minute = Integer.parseInt(time_str.substring(3, 5));
-
-        /**
-         *
-         */
-        if (this.minute >= 60) {
-            this.minute -= 60;
-            this.hour++;
-        }
-
-        /**
-         *
-         */
-        int hour = this.hour;
-        if (hour >= 24) {
-            hour -= 24;
-        }
-        this.time_str = String.format("%02d:%02d", hour, minute);
+    public int getSeconds() {
+        return time.get(Calendar.SECOND);
     }
 
-    public void updateLeftTimeStr(int current_hour, int current_minute, int current_second) {
+    public int getDayOfYear() {
+        return time.get(Calendar.DAY_OF_YEAR);
+    }
 
-        int absoluteSecond_delta = getAbsoluteSecond() - (current_hour * 3600 + current_minute * 60 + current_second);
+    /**
+     * 이 객체가 가리키는 시각을 돌려준다.
+     *
+     * @return 시각 (사본이므로 값을 변경해도 원래 시각에는 영향 없음)
+     */
+    public Calendar getTime() {
+        return (Calendar) time.clone();
+    }
 
-        if (absoluteSecond_delta < -60) {
-            left_time_str = " - ";
+    /**
+     * 현재 시각에 주어진 시간을 더한 시각을 나타낸 객체를 생성하여 돌려준다. 음수나 범위를 초과한 값도 허용된다.
+     *
+     * @param hours 시
+     * @param minutes 분
+     * @param seconds 초
+     * @return 주어진 시간 값을 더한 사본
+     */
+    public BusTimeModel addTime(int hours, int minutes, int seconds) {
+        BusTimeModel newTime = clone();
+        newTime.time.add(Calendar.HOUR_OF_DAY, hours);
+        newTime.time.add(Calendar.MINUTE, minutes);
+        newTime.time.add(Calendar.SECOND, seconds);
+        return newTime;
+    }
 
-        } else if (absoluteSecond_delta < 0) {
-            left_time_str = "곧 도착하거나 지나갔습니다";
-
-        } else if (absoluteSecond_delta < 30) {
-            left_time_str = "잠시 후 도착합니다";
-
-        } else {
-
-            int date_delta = (absoluteSecond_delta / 86400);
-            int hour_delta = (absoluteSecond_delta / 3600) % 24;
-            int minute_delta = (absoluteSecond_delta / 60) % 60;
-            int second_delta = (absoluteSecond_delta) % 60;
-
-            if (date_delta > 0) {
-                left_time_str = String.format("%d일 %02d시간 %02d분 전", date_delta, hour_delta, minute_delta);
-
-            } else if (hour_delta > 0) {
-                left_time_str = String.format("%d시간 %02d분 전", hour_delta, minute_delta);
-
-            } else if (minute_delta > 0) {
-                left_time_str = String.format("%d분 %02d초 전", minute_delta, second_delta);
-
-            } else {
-                left_time_str = String.format("%d초 전", second_delta);
-
-            }
+    @Override
+    public BusTimeModel clone() {
+        try {
+            BusTimeModel newTime = (BusTimeModel) super.clone();
+            newTime.time = (Calendar) time.clone();
+            return newTime;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
         }
+    }
+
+    @Override
+    public int compareTo(BusTimeModel otherBusTime) {
+        return time.compareTo(otherBusTime.time);
     }
 }
