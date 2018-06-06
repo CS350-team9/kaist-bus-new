@@ -18,6 +18,16 @@ public class DateUtils {
     }
 
     /**
+     * 주어진 객체의 시각을 유닉스 시간 기준 일수로 환산하여 돌려준다.
+     *
+     * @param time 날짜 수로 환산할 시각을 나타내는 객체
+     * @return 날짜 수(유닉스 시간 기준)
+     */
+    public static long toAbsoluteDays(Calendar time) {
+        return time.getTimeInMillis() / (1000 * 60 * 60 * 24);
+    }
+
+    /**
      * 현재 (시스템) 시각이 오전 4시 이전인지 확인한다.
      *
      * @return
