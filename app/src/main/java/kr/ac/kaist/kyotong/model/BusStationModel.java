@@ -41,6 +41,16 @@ public class BusStationModel {
         return busStationModel;
     }
 
+    public static BusStationModel newInstance(String name_full) {
+        BusStationModel busStationModel = new BusStationModel();
+        if (name_full.contains("(") && name_full.contains(")")) {
+            busStationModel.name = name_full.substring(0, name_full.indexOf("("));
+        } else {
+            busStationModel.name = name_full;
+        }
+        return busStationModel;
+    }
+
     public static Location newLocationInstance(double latitude, double longitude) {
         Location location = new Location("");
         location.setLatitude(latitude);
@@ -135,6 +145,21 @@ public class BusStationModel {
                 break;
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!BusStationModel.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+        final BusStationModel otherBusStationModel = (BusStationModel) obj;
+        if ((this.name == null) ? (otherBusStationModel.name == null) : !this.name.equals(otherBusStationModel.name)) {
+            return false;
+        }
+        return true;
     }
 
 }

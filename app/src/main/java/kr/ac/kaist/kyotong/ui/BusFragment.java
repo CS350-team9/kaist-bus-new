@@ -28,6 +28,8 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -40,6 +42,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -132,6 +135,7 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 
     //TODO Google Map 관련 코드
     private MapView mapView = null;
+    private Marker lastClicked = null;
 
 
     /**
@@ -165,6 +169,8 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
          */
         int title_id = getArguments().getInt(ARG_SECTION_NUMBER);
         mPosition = getArguments().getInt(ARG_POSITION);
+
+        Log.w("titleChange", Integer.toString(title_id));
 
         /**
          *
@@ -323,7 +329,6 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
          */
         @Override
         protected HashMap<String, Object> doInBackground(Integer... params) {
-
             BusApi busApi = new BusApi(params[0]);
             return busApi.getResult();
         }
@@ -344,6 +349,7 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
                 @Override
                 public void onStationClick(int stationIndex) {
                     updateStation(stationIndex);
+                    Log.w("onClick", "onClicked");
                 }
             });
             circularBusRouteMapView.updateStations(busStationModels);
@@ -711,9 +717,9 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        BusApi busApi = new BusApi(R.string.tab_kaist_wolpyeong);
+        final BusApi busApi = new BusApi(R.string.tab_kaist_olev);
 
-        ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
+        final ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
 
         int padding = -5;
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -724,10 +730,14 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
             Location loc = bm.location;
             LatLng thisStation = new LatLng(loc.getLatitude(), loc.getLongitude());
             builder.include(thisStation);
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(thisStation);
-            markerOptions.title(bm.name);
-            googleMap.addMarker(markerOptions);
+
+            if (i != busStationModels.size() - 1) {
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(thisStation);
+                markerOptions.title(bm.name);
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                googleMap.addMarker(markerOptions);
+            }
 
             // polyline at path
             ArrayList<LatLng> pointsOnPathToNextStation = locationCoordToLatLng(bm.pointsOnPathToNextStation);
@@ -747,16 +757,18 @@ public class BusFragment extends Fragment implements OnMapReadyCallback {
 
         LatLngBounds bounds = builder.build();
         final CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(busStationModels.get(0).location.getLatitude(), busStationModels.get(0).location.getLongitude())));
-//        googleMap.animateCamera(CameraUpdateFactory.zoomTo(16));
-
         googleMap.animateCamera(cu);
 
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Log.d(TAG, "onMarkerClick");
+                int idx = busStationModels.indexOf(BusStationModel.newInstance(marker.getTitle()));
+                if (lastClicked != null) {
+                    lastClicked.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                }
+                marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                lastClicked = marker;
+                updateStation(idx);
                 return true;
             }
         });

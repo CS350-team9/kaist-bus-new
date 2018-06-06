@@ -109,22 +109,18 @@ public class CircularBusRouteMapView extends ConstraintLayout {
             View.OnClickListener iconClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    System.out.println("clicked!");
                     for (View stationIcon : stationIcons)
                         stationIcon.setBackgroundResource(R.drawable.bus_fragment_station);
                     stationIcons.get(stationIndex).setBackgroundResource(R.drawable.bus_fragment_station_selected);
 
-                    System.out.println("clicked!2");
 
                     for (TextView stationNameView : stationNameViews)
                         stationNameView.setTypeface(null, Typeface.NORMAL);
                     stationNameViews.get(stationIndex).setTypeface(null, Typeface.BOLD);
 
-                    System.out.println("clicked!3");
 
                     listener.onStationClick(stationIndex);
 
-                    System.out.println("clicked!4");
                 }
             };
             stationIcons.get(i).setOnClickListener(iconClickListener);
