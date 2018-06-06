@@ -135,7 +135,7 @@ public class CircularBusRouteMapView extends ConstraintLayout {
 
         //정거장 이름표의 텍스트 설정
         for (int i = 0; i < stations.size(); ++i)
-            stationNameViews.get(i).setText(stations.get(i).getFullName());
+            stationNameViews.get(i).setText(stations.get(i).getName());
 
         int centerCircleRadius      = centerCircle.getWidth() / 2;
         int stationIconOffset       = (int) (centerCircleRadius * 1.25);
@@ -146,7 +146,11 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         for (int i = 0; i < stations.size(); ++i) {
             float stationAngle = (float) (stations.get(i).getDegree());
             constraints.constrainCircle(stationIcons.get(i).getId(), getId(), stationIconOffset, stationAngle);
-            constraints.constrainCircle(stationNameViews.get(i).getId(), getId(), stationNameViewOffset, stationAngle);
+            int stationNameViewAdjustment = (int) Math.round(
+                    0.015 * mainContentHeight * stations.get(i).getName().length()
+                            * Math.abs(Math.sin(Math.toRadians(stationAngle)))
+            );
+            constraints.constrainCircle(stationNameViews.get(i).getId(), getId(), stationNameViewOffset + stationNameViewAdjustment, stationAngle);
         }
         constraints.applyTo(this);
     }
