@@ -9,11 +9,11 @@
         android:title="정보"
         app:showAsAction="always" />
 
-    <item
-        android:id="@+id/action_change"
-        android:orderInCategory="2"
-        android:title="탭 순서 변경하기"
-        app:showAsAction="never" />
+    <!--<item-->
+        <!--android:id="@+id/action_change"-->
+        <!--android:orderInCategory="2"-->
+        <!--android:title="탭 순서 변경하기"-->
+        <!--app:showAsAction="never" />-->
 
     <item
         android:id="@+id/action_email"

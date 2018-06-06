@@ -34,11 +34,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Bab.NoActionBar.Black" />
 
-        <activity
-            android:name=".ui.ShuttleActivity"
-            android:label="탭 순서 변경하기"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Bab" />
+        <!--<activity-->
+            <!--android:name=".ui.ShuttleActivity"-->
+            <!--android:label="탭 순서 변경하기"-->
+            <!--android:screenOrientation="portrait"-->
+            <!--android:theme="@style/Theme.Bab" />-->
 
         <!-- Ad Mob Related -->
         <activity

@@ -3,8 +3,7 @@ package kr.ac.kaist.kyotong.api;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Calendar;
 import java.util.HashMap;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -16,115 +15,44 @@ import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.DateUtils;
 
 
-/**
- * Created by yearnning on 14. 12. 29..
- */
 public class BusApi extends ApiBase {
-
-    private final static String TAG = "BusApi";
+    private final static String TAG = BusApi.class.getName();
 
     private ArrayList<BusStationModel> busStationModels;
-    private ArrayList<BusModel> buses = new ArrayList<BusModel>();
-
+    private ArrayList<BusModel> buses = new ArrayList<>();
 
     /**
-     * Init
+     * 주어진 버스 노선에 대한 데이터를 생성한다.
+     * @param title_id 버스 노선
      */
     public BusApi(int title_id) {
-
-        /**
-         * init busStations
-         */
         busStationModels = createStations(title_id);
 
-        /**
-         * create Today Buses.
-         */
-        ArrayList<BusModel> todayBuses = createTodayBuses(title_id);
-        addBusTimeInBusStations(busStationModels, todayBuses, true);
-        buses.addAll(todayBuses);
+        Calendar date = Calendar.getInstance();
+        if (DateUtils.beforeFourAM())
+            date.add(Calendar.DATE, -1);
 
-        /**
-         * create Tomorrow Buses.
-         */
-        ArrayList<BusModel> tomorrowBuses = createTomorrowBuses(title_id);
-        addBusTimeInBusStations(busStationModels, tomorrowBuses, false);
+        //이틀 분량의 버스 운행 일정을 생성한다.
+        for (int dayOffset = 0; dayOffset < 2; ++dayOffset) {
+            if (DateUtils.isHoliday(date))
+                buses.addAll(createHolidayBuses(title_id, date));
+            else
+                buses.addAll(createWeekdayBuses(title_id, date));
 
-        /**
-         * SORT
-         */
-        sort(buses, busStationModels);
-
-        /**
-         * addHeader Info
-         */
-        addHeaderInBusStations(busStationModels);
-
-    }
-
-    private ArrayList<BusModel> createTodayBuses(int title_id) {
-
-        boolean holiday;
-        if (DateUtils.beforeFourAM()) {
-            holiday = DateUtils.isHoliday(-1);
-            Log.d(TAG, "Today Bus by Yesterday");
-        } else {
-            holiday = DateUtils.isHoliday(0);
-            Log.d(TAG, "Today Bus by Today");
+            date.add(Calendar.DATE, 1);
         }
 
-        if (holiday) {
-            return createHolidayBuses(title_id);
-        } else {
-            return createWeekdayBuses(title_id);
-        }
-    }
-
-    private ArrayList<BusModel> createTomorrowBuses(int title_id) {
-
-        boolean holiday;
-        if (DateUtils.beforeFourAM()) {
-            holiday = DateUtils.isHoliday(0);
-        } else {
-            holiday = DateUtils.isHoliday(1);
-        }
-
-        if (holiday) {
-            return createHolidayBuses(title_id);
-        } else {
-            return createWeekdayBuses(title_id);
-        }
-    }
-
-    private void addBusTimeInBusStations(ArrayList<BusStationModel> busStationModels, ArrayList<BusModel> buses, boolean today) {
-        if (buses.size() > 0) {
-            for (BusModel busModel : buses) {
-                for (int i = 0; i < busModel.busDepartureTimes.size(); i++) {
-                    if (!today) {
-                        busModel.getDepartureTime(i).makeTomorrowBusTime();
-                    }
-                    busModel.getBusDepartureStation(i).addDepartureTime(busModel.getDepartureTime(i));
-                }
-            }
-        } else {
-            for (BusStationModel busStationModel : busStationModels) {
-                BusTimeModel busTimeModel = new BusTimeModel();
-                busTimeModel.setIndicatorString("주말 및 공휴일은 운행하지 않습니다");
-                if (today)
-                    busTimeModel.setTime(24, 0);
-                else
-                    busTimeModel.setTime(48, 0);
-
-                busStationModel.addDepartureTime(busTimeModel);
+        //각 정거장에 대한 시간표를 생성한다.
+        for (BusModel bus : buses) {
+            //종점은 시간표에 넣지 않음
+            for (int stationIndex = 0; stationIndex < bus.stationCount() - 1; ++stationIndex) {
+                bus.getStation(stationIndex).addDepartureTime(bus.getVisitTime(stationIndex));
             }
         }
 
-    }
-
-    private void addHeaderInBusStations(ArrayList<BusStationModel> busStaions) {
-        for (BusStationModel busStationModel : busStaions) {
-            busStationModel.addHeader();
-        }
+        //각 정거장의 버스 시간을 정렬한다.
+        for (BusStationModel station : busStationModels)
+            station.sortBusTimes();
     }
 
     /**
@@ -425,87 +353,93 @@ public class BusApi extends ApiBase {
              * KAIST
              */
             case R.string.tab_kaist_olev:
-                busStationModels.add(BusStationModel.newInstance("카이마루", 0, new LatLng(36.373428, 127.359221)));
-                busStationModels.add(BusStationModel.newInstance("스컴", 30, new LatLng(36.372784, 127.361855)));
-                busStationModels.add(BusStationModel.newInstance("창의관", 60, new LatLng(36.370849, 127.362381)));
-                busStationModels.add(BusStationModel.newInstance("의과학센터", 110, new LatLng(36.370193, 127.365932)));
-                busStationModels.add(BusStationModel.newInstance("파팔라도", 140, new LatLng(36.369545, 127.369612)));
-                busStationModels.add(BusStationModel.newInstance("정문", 200, new LatLng(36.366357, 127.363614)));
-                busStationModels.add(BusStationModel.newInstance("오리연못", 230, new LatLng(36.367420, 127.362574)));
-                busStationModels.add(BusStationModel.newInstance("교육지원동", 270, new LatLng(36.370020, 127.360728)));
-                busStationModels.add(BusStationModel.newInstance("아름관(간이)", 310, new LatLng(36.373484, 127.356651)));
-                busStationModels.add(BusStationModel.newInstance("카이마루", 360, new LatLng(36.373428, 127.359221)));
+                busStationModels.add(new BusStationModel("카이마루", 0, new LatLng(36.373428, 127.359221)));
+                busStationModels.add(new BusStationModel("스컴", 30, new LatLng(36.372784, 127.361855)));
+                busStationModels.add(new BusStationModel("창의관", 60, new LatLng(36.370849, 127.362381)));
+                busStationModels.add(new BusStationModel("의과학센터", 110, new LatLng(36.370193, 127.365932)));
+                busStationModels.add(new BusStationModel("파팔라도", 140, new LatLng(36.369545, 127.369612)));
+                busStationModels.add(new BusStationModel("정문", 200, new LatLng(36.366357, 127.363614)));
+                busStationModels.add(new BusStationModel("오리연못", 230, new LatLng(36.367420, 127.362574)));
+                busStationModels.add(new BusStationModel("교육지원동", 270, new LatLng(36.370020, 127.360728)));
+                busStationModels.add(new BusStationModel("아름관(간이)", 310, new LatLng(36.373484, 127.356651)));
+                busStationModels.add(new BusStationModel("카이마루", 360, new LatLng(36.373428, 127.359221)));
 
                 for (int i = 0; i < pathsBetweenStations_olev.length; ++i) {
                     for (LatLng coords : pathsBetweenStations_olev[i])
-                        busStationModels.get(i).pointsOnPathToNextStation.add(coords);
+                        busStationModels.get(i).addNextPointOnPath(coords);
                 }
 
                 break;
 
             case R.string.tab_kaist_wolpyeong:
-                busStationModels.add(BusStationModel.newInstance("강당", 0, new LatLng(36.372485, 127.363282)));
-                busStationModels.add(BusStationModel.newInstance("본관", 30, new LatLng(36.369884, 127.360720)));
-                busStationModels.add(BusStationModel.newInstance("오리연못", 60, new LatLng(36.367198, 127.362556)));
-                busStationModels.add(BusStationModel.newInstance("충남대앞(일미식당)", 97, new LatLng(36.361533, 127.345736), R.drawable.station_kaist_wolpyeong_3));
-                busStationModels.add(BusStationModel.newInstance("월평역(1번출구)", 128, new LatLng(36.358109, 127.364356), R.drawable.station_kaist_wolpyeong_4));
-                busStationModels.add(BusStationModel.newInstance("갤러리아(대일빌딩)", 189, new LatLng(36.352054, 127.376309), R.drawable.station_kaist_wolpyeong_5));
-                busStationModels.add(BusStationModel.newInstance("청사시외(택시승강장)", 232, new LatLng(36.361140, 127.379472), R.drawable.station_kaist_wolpyeong_6));
-                busStationModels.add(BusStationModel.newInstance("월평역(3번출구)", 282, new LatLng(36.358587, 127.363199), R.drawable.station_kaist_wolpyeong_7));
-                busStationModels.add(BusStationModel.newInstance("오리연못", 300, new LatLng(36.367420, 127.362574)));
-                busStationModels.add(BusStationModel.newInstance("본관", 330, new LatLng(36.369929, 127.360819)));
-                busStationModels.add(BusStationModel.newInstance("강당", 360, new LatLng(36.372404, 127.363313)));
+                busStationModels.add(new BusStationModel("강당", 0, new LatLng(36.372485, 127.363282)));
+                busStationModels.add(new BusStationModel("본관", 30, new LatLng(36.369884, 127.360720)));
+                busStationModels.add(new BusStationModel("오리연못", 60, new LatLng(36.367198, 127.362556)));
+                busStationModels.add(new BusStationModel("충남대앞(일미식당)", 97, new LatLng(36.361533, 127.345736), R.drawable.station_kaist_wolpyeong_3));
+                busStationModels.add(new BusStationModel("월평역(1번출구)", 128, new LatLng(36.358109, 127.364356), R.drawable.station_kaist_wolpyeong_4));
+                busStationModels.add(new BusStationModel("갤러리아(대일빌딩)", 189, new LatLng(36.352054, 127.376309), R.drawable.station_kaist_wolpyeong_5));
+                busStationModels.add(new BusStationModel("청사시외(택시승강장)", 232, new LatLng(36.361140, 127.379472), R.drawable.station_kaist_wolpyeong_6));
+                busStationModels.add(new BusStationModel("월평역(3번출구)", 282, new LatLng(36.358587, 127.363199), R.drawable.station_kaist_wolpyeong_7));
+                busStationModels.add(new BusStationModel("오리연못", 300, new LatLng(36.367420, 127.362574)));
+                busStationModels.add(new BusStationModel("본관", 330, new LatLng(36.369929, 127.360819)));
+                busStationModels.add(new BusStationModel("강당", 360, new LatLng(36.372404, 127.363313)));
 
                 for (int i = 0; i < pathsBetweenStations_wolpyeong.length; ++i) {
                     for (LatLng coords : pathsBetweenStations_wolpyeong[i])
-                        busStationModels.get(i).pointsOnPathToNextStation.add(coords);
+                        busStationModels.get(i).addNextPointOnPath(coords);
                 }
 
                 break;
 
             case R.string.tab_kaist_sunhwan:
-                busStationModels.add(BusStationModel.newInstance("문지캠퍼스(화암방향)", 0, new LatLng(36.393770, 127.399925)));
-                busStationModels.add(BusStationModel.newInstance("화암기숙사", 90, new LatLng(36.408435, 127.381788)));
-                busStationModels.add(BusStationModel.newInstance("문지캠퍼스(본원방향)", 180, new LatLng(36.393794, 127.400063)));
-                busStationModels.add(BusStationModel.newInstance("로덴하우스", 225, new LatLng(36.388011, 127.378545)));
-                busStationModels.add(BusStationModel.newInstance("본원(대덕캠퍼스)", 270, new LatLng(36.372485, 127.363282)));
-                busStationModels.add(BusStationModel.newInstance("교수아파트", 315, new LatLng(36.388524, 127.379928)));
-                busStationModels.add(BusStationModel.newInstance("문지", 360, new LatLng(36.393770, 127.399925)));
+                busStationModels.add(new BusStationModel("문지캠퍼스(화암방향)", 0, new LatLng(36.393770, 127.399925)));
+                busStationModels.add(new BusStationModel("화암기숙사", 90, new LatLng(36.408435, 127.381788)));
+                busStationModels.add(new BusStationModel("문지캠퍼스(본원방향)", 180, new LatLng(36.393794, 127.400063)));
+                busStationModels.add(new BusStationModel("로덴하우스", 225, new LatLng(36.388011, 127.378545)));
+                busStationModels.add(new BusStationModel("본원(대덕캠퍼스)", 270, new LatLng(36.372485, 127.363282)));
+                busStationModels.add(new BusStationModel("교수아파트", 315, new LatLng(36.388524, 127.379928)));
+                busStationModels.add(new BusStationModel("문지", 360, new LatLng(36.393770, 127.399925)));
 
                 for (int i = 0; i < pathsBetweenStations_munji.length; ++i) {
                     for (LatLng coords : pathsBetweenStations_munji[i])
-                        busStationModels.get(i).pointsOnPathToNextStation.add(coords);
+                        busStationModels.get(i).addNextPointOnPath(coords);
                 }
 
                 break;
+
+            default:
+                Log.e(TAG, String.format("잘못된 버스 노선 ID입니다 (%d)", title_id));
         }
         return busStationModels;
     }
 
     /**
-     * @param title_id
-     * @param busStationModels
-     * @return
+     * 주어진 노선의 공휴일 버스 일정을 생성한다.
+     *
+     * @param title_id 버스 노선을 나타내는 문자열의 ID
+     * @return 버스 일정
      */
-    private ArrayList<BusModel> createHolidayBuses(int title_id) {
+    private ArrayList<BusModel> createHolidayBuses(int title_id, Calendar date) {
         ArrayList<BusModel> buses = new ArrayList<>();
 
         if (title_id == R.string.tab_kaist_sunhwan) {
             for (int h = 7; h < 26; h += 3)
-                buses.add(createBus(h, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, h, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
 
             for (int h = 9; h < 25; h += 3)
-                buses.add(createBus(h, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, h, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
         }
 
         return buses;
     }
 
     /**
-     * @param title_id
-     * @return
+     * 주어진 노선의 평일 버스 일정을 생성한다.
+     *
+     * @param title_id 버스 노선을 나타내는 문자열의 ID
+     * @return 버스 일정
      */
-    private ArrayList<BusModel> createWeekdayBuses(int title_id) {
+    private ArrayList<BusModel> createWeekdayBuses(int title_id, Calendar date) {
         ArrayList<BusModel> buses = new ArrayList<>();
 
         switch (title_id) {
@@ -515,45 +449,45 @@ public class BusApi extends ApiBase {
              */
             case R.string.tab_kaist_olev:
                 for (int m = 30; m <= 3 * 60 + 45; m += 15)
-                    buses.add(createBus(8, m, new int[]{0, 1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
+                    buses.add(createBus(date, 8, m, new int[]{0, 1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
                 for (int m = 0; m <= 4 * 60; m += 15)
-                    buses.add(createBus(13, m, new int[]{0, 1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
+                    buses.add(createBus(date, 13, m, new int[]{0, 1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
                 break;
 
             case R.string.tab_kaist_wolpyeong:
                 for (int h = 9; h <= 17; h++) {
                     if (h != 12) {
-                        buses.add(createBus(h, 0, new int[]{0, 2, 4, 10, 15, 25, 32, 40, 43, 44, 45}, 0));
+                        buses.add(createBus(date, h, 0, new int[]{0, 2, 4, 10, 15, 25, 32, 40, 43, 44, 45}, 0));
                     }
                 }
                 break;
 
             case R.string.tab_kaist_sunhwan:
-                buses.add(createBus(7, 10, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(7, 40, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(8, 10, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(8, 40, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(9, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(9, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(10, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(10, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(11, 20, new int[]{0, 10, 20}, 0));
-                buses.add(createBus(11, 50, new int[]{0, 10, 20, 24, 30}, 0));
+                buses.add(createBus(date, 7, 10, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 7, 40, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 8, 10, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 8, 40, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 9, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 9, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 10, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 10, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 11, 20, new int[]{0, 10, 20}, 0));
+                buses.add(createBus(date, 11, 50, new int[]{0, 10, 20, 24, 30}, 0));
 
-                buses.add(createBus(13, 0, new int[]{0, 15, 20}, 4));
+                buses.add(createBus(date, 13, 0, new int[]{0, 15, 20}, 4));
 
                 for (int h = 13; h < 27; h++) {
-                    buses.add(createBus(h, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                    buses.add(createBus(date, h, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
                 }
 
-                buses.add(createBus(16, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(17, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(18, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(19, 50, new int[]{0, 10, 20}, 0));
-                buses.add(createBus(21, 10, new int[]{0, 4, 20, 35, 40}, 2));
-                buses.add(createBus(21, 50, new int[]{0, 10, 20}, 0));
+                buses.add(createBus(date, 16, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 17, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 18, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 19, 50, new int[]{0, 10, 20}, 0));
+                buses.add(createBus(date, 21, 10, new int[]{0, 4, 20, 35, 40}, 2));
+                buses.add(createBus(date, 21, 50, new int[]{0, 10, 20}, 0));
 
-                buses.add(createBus(27, 20, new int[]{0, 10, 20}, 0));
+                buses.add(createBus(date, 27, 20, new int[]{0, 10, 20}, 0));
 
                 break;
 
@@ -562,43 +496,26 @@ public class BusApi extends ApiBase {
         return buses;
     }
 
-    private void sort(ArrayList<BusModel> buses, ArrayList<BusStationModel> busStationModels) {
-        Collections.sort(buses, new Comparator<BusModel>() {
-            @Override
-            public int compare(BusModel lhs, BusModel rhs) {
-                return lhs.getDepartureTime(0).getAbsoluteSeconds() > rhs.getDepartureTime(0).getAbsoluteSeconds() ? 1 : -1;
-            }
-        });
+    private BusModel createBus(Calendar date, int baseHours, int baseMinutes, int deltaMinutes[], int offset) {
+        BusModel bus = new BusModel();
 
-        for (BusStationModel busStationModel : busStationModels) {
-            Collections.sort(busStationModel.departureTimes, new Comparator<BusTimeModel>() {
-                @Override
-                public int compare(BusTimeModel lhs, BusTimeModel rhs) {
-                    return lhs.getAbsoluteSeconds() - rhs.getAbsoluteSeconds();
-                }
-            });
+        BusTimeModel visitTime = new BusTimeModel(date, baseHours, baseMinutes, 0);
+
+        //첫 정거장 추가
+        bus.addNextStation(busStationModels.get(offset), visitTime);
+
+        //이후의 정거장 추가
+        for (int deltaMin : deltaMinutes) {
+            offset = (offset + 1) % busStationModels.size();
+            visitTime = visitTime.addTime(0, deltaMin, 0);
+            bus.addNextStation(busStationModels.get(offset), visitTime);
+            Log.d(TAG, String.format("Added %02d:%02d to station %s",
+                    visitTime.getHours(),
+                    visitTime.getMinutes(),
+                    busStationModels.get(offset).getFullName()));
         }
-    }
 
-    private BusModel createBus(int baseHours, int baseMinutes, int deltaMinutes[], int offset) {
-        BusModel busModel = new BusModel();
-        for (int i = 0; i < deltaMinutes.length - 1; i++) {
-            addPathInBus(busModel, i + offset, baseHours, baseMinutes + deltaMinutes[i], (i + 1 + offset) % busStationModels.size(), baseHours, baseMinutes + deltaMinutes[i + 1]);
-        }
-        return busModel;
-    }
-
-    private void addPathInBus(BusModel busModel,
-                              int departureStationIndex, int departureTimeHours, int departureTimeMinutes,
-                              int arrivalStationIndex, int arrivalTimeHours, int arrivalTimeMinutes) {
-        BusTimeModel busDepartureTime = new BusTimeModel();
-        busDepartureTime.setTime(departureTimeHours, departureTimeMinutes, 0);
-
-        BusTimeModel busArrivalTime = new BusTimeModel();
-        busArrivalTime.setTime(arrivalTimeHours, arrivalTimeMinutes, 0);
-
-        busModel.addPath(busStationModels.get(departureStationIndex), busDepartureTime, busStationModels.get(arrivalStationIndex), busArrivalTime);
-
+        return bus;
     }
 
     /**
