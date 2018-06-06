@@ -64,7 +64,7 @@ public class BusFragment extends Fragment {
      * The fragment argument representing the section number for this
      * fragment.
      */
-    private static final String TAG = "BusFragment";
+    private static final String TAG = BusFragment.class.getName();
     private static final String ARG_SECTION_NUMBER = "arg_section_number";
     private static final String ARG_POSITION = "arg_position";
 
