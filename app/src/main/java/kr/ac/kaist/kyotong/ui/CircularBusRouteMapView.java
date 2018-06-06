@@ -170,20 +170,15 @@ public class CircularBusRouteMapView extends ConstraintLayout {
         ArrayList<Float>    activeBusAngles = new ArrayList<>();
         Calendar now = Calendar.getInstance();
         for (BusModel bus : buses) {
-            int busAngle = bus.getAngle(now);
-            if (busAngle != -1) {
+            float busAngle = bus.getAngle(now);
+            if (busAngle >= 0) {
                 activeBuses.add(bus);
-                activeBusAngles.add(busAngle / 360.0f);
+                activeBusAngles.add(busAngle);
             }
         }
 
-        int busIconSize = SizeUtils.dpToPixels(getContext(), 10.0f);
-
         while (busIcons.size() < activeBuses.size()) {
-            View busIcon = new View(getContext());
-            busIcon.setId(ViewIdGenerator.generateViewId());
-            busIcon.setBackgroundResource(R.drawable.bus_fragment_bus);
-            busIcon.setLayoutParams(new FrameLayout.LayoutParams(busIconSize, busIconSize));
+            View busIcon = createBusIconView();
             busIcons.add(busIcon);
             addView(busIcon);
         }
@@ -201,5 +196,16 @@ public class CircularBusRouteMapView extends ConstraintLayout {
             constraints.constrainCircle(busIcons.get(i).getId(), getId(), busIconOffset, activeBusAngles.get(i));
         }
         constraints.applyTo(this);
+    }
+
+    private View createBusIconView() {
+        int busIconSize = SizeUtils.dpToPixels(getContext(), 10.0f);
+
+        View busIcon = new View(getContext());
+        busIcon.setId(ViewIdGenerator.generateViewId());
+        busIcon.setBackgroundResource(R.drawable.bus_fragment_bus);
+        busIcon.setLayoutParams(new FrameLayout.LayoutParams(busIconSize, busIconSize));
+
+        return busIcon;
     }
 }

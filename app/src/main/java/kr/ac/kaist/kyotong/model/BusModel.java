@@ -105,9 +105,9 @@ public class BusModel {
      * 주어진 시간에 버스의 예상 위치를 계산하여 원형 그래프에 표시할 수 있는 각도로 돌려준다.
      *
      * @param time  시간
-     * @return 각도 (0 <= value <= 360) / 운행 시간이 아닐 경우 -1
+     * @return 각도 (0.0 <= value <= 360.0) / 운행 시간이 아닐 경우 음수
      */
-    public int getAngle(Calendar time) {
+    public float getAngle(Calendar time) {
         int nextStationIndex = getNextStationAt(time);
 
         if (nextStationIndex == 0 || nextStationIndex == stations.size())
@@ -122,6 +122,7 @@ public class BusModel {
         int departingStationAngle = stations.get(nextStationIndex - 1).getDegree();
         int arrivingStationAngle = stations.get(nextStationIndex).getDegree();
 
-        return (int) Math.round(progress * (arrivingStationAngle - departingStationAngle) + departingStationAngle);
+        float angle = (float) (progress * (arrivingStationAngle - departingStationAngle) + departingStationAngle);
+        return angle > 0 ? angle : 0;
     }
 }
