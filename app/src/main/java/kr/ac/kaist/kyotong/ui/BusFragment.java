@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
@@ -124,6 +127,7 @@ public class BusFragment extends Fragment {
 
     //TODO Google Map 관련 코드
     private MapView mapView = null;
+    private Marker lastClicked = null;
     private GoogleMap googleMap = null;
 
 
@@ -158,6 +162,8 @@ public class BusFragment extends Fragment {
          */
         int title_id = getArguments().getInt(ARG_SECTION_NUMBER);
         mPosition = getArguments().getInt(ARG_POSITION);
+
+        Log.w("titleChange", Integer.toString(title_id));
 
         /**
          *
@@ -250,13 +256,6 @@ public class BusFragment extends Fragment {
         mapView = rootView.findViewById(R.id.mapView);
         mapView.setVisibility(View.INVISIBLE);
         mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                BusFragment.this.googleMap = googleMap;
-                initializeGoogleMap();
-            }
-        });
 
         /**
          *
@@ -317,7 +316,6 @@ public class BusFragment extends Fragment {
          */
         @Override
         protected HashMap<String, Object> doInBackground(Integer... params) {
-
             BusApi busApi = new BusApi(params[0]);
             return busApi.getResult();
         }
@@ -338,6 +336,7 @@ public class BusFragment extends Fragment {
                 @Override
                 public void onStationClick(int stationIndex) {
                     updateStation(stationIndex);
+                    Log.w("onClick", "onClicked");
                 }
             });
             circularBusRouteMapView.updateStations(busStationModels);
@@ -349,6 +348,14 @@ public class BusFragment extends Fragment {
             mTimer.schedule(mBusTimerTask, ( 1000 - Calendar.getInstance().get(Calendar.MILLISECOND)) % 1000, 1000);
 
             mBusApiTask = null;
+
+            mapView.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap googleMap) {
+                    BusFragment.this.googleMap = googleMap;
+                    initializeGoogleMap(busStationModels);
+                }
+            });
         }
 
         /**
@@ -712,12 +719,10 @@ public class BusFragment extends Fragment {
         super.onLowMemory();
     }
 
-    public void initializeGoogleMap() {
-        BusApi busApi = new BusApi(R.string.tab_kaist_wolpyeong);
 
-        ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
-
-        int padding = -5;
+    public void initializeGoogleMap(final ArrayList<BusStationModel> busStationModels) {
+        // Google map bounds
+        int padding = 100;
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
         for (int i = 0; i < busStationModels.size(); i++) {
@@ -726,13 +731,22 @@ public class BusFragment extends Fragment {
             LatLng loc = bm.getCoordinates();
             LatLng thisStation = new LatLng(loc.latitude, loc.longitude);
             builder.include(thisStation);
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(thisStation);
-            markerOptions.title(bm.getName());
-            googleMap.addMarker(markerOptions);
+
+            if (i != busStationModels.size() - 1) {
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(thisStation);
+                markerOptions.title(bm.getName());
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                googleMap.addMarker(markerOptions);
+            }
 
             // polyline at path
             ArrayList<LatLng> pointsOnPathToNextStation = (ArrayList<LatLng>) bm.getPathToNextStation().clone();
+
+            // include bounds
+            for (LatLng pnt : pointsOnPathToNextStation) {
+                builder.include(pnt);
+            }
 
             pointsOnPathToNextStation.add(0, thisStation);
             if (i < busStationModels.size() - 1) {
@@ -749,16 +763,18 @@ public class BusFragment extends Fragment {
 
         LatLngBounds bounds = builder.build();
         final CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(busStationModels.get(0).location.getLatitude(), busStationModels.get(0).location.getLongitude())));
-//        googleMap.animateCamera(CameraUpdateFactory.zoomTo(16));
-
         googleMap.animateCamera(cu);
 
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Log.d(TAG, "onMarkerClick");
+                int idx = busStationModels.indexOf(new BusStationModel(marker.getTitle()));
+                if (lastClicked != null) {
+                    lastClicked.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                }
+                marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                lastClicked = marker;
+                updateStation(idx);
                 return true;
             }
         });

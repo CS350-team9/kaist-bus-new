@@ -1,5 +1,7 @@
 package kr.ac.kaist.kyotong.model;
 
+import android.location.Location;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.lang.reflect.Array;
@@ -29,6 +31,15 @@ public class BusStationModel {
 
     public ArrayList<LatLng> getPathToNextStation() {
         return pathToNextStation;
+    }
+
+    // For Google Map onMarkerClick()
+    public BusStationModel(String fullName) {
+        this.fullName = fullName;
+        if (fullName.contains("(") && fullName.contains(")"))
+            name = fullName.substring(0, fullName.indexOf("("));
+        else
+            name = fullName;
     }
 
     public BusStationModel(String fullName, int degree, LatLng coordinates) {
@@ -70,6 +81,20 @@ public class BusStationModel {
         Collections.sort(visitTimes);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!BusStationModel.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+        final BusStationModel otherBusStationModel = (BusStationModel) obj;
+        if ((this.name == null) ? (otherBusStationModel.name == null) : !this.name.equals(otherBusStationModel.name)) {
+            return false;
+        }
+        return true;
+    }
 
     private static final String TAG = BusStationModel.class.getName();
     /**
