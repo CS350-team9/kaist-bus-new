@@ -117,7 +117,7 @@ public class BusModel {
         long arrivingTime = visitTimes.get(nextStationIndex).getAbsoluteSeconds();
 
         long seconds = time.getTimeInMillis() / 1000;
-        double progress = 1.0 * (arrivingTime - seconds) / (arrivingTime - departingTime);
+        double progress = 1.0 * (seconds - departingTime) / (arrivingTime - departingTime);
 
         int departingStationAngle = stations.get(nextStationIndex - 1).getDegree();
         int arrivingStationAngle = stations.get(nextStationIndex).getDegree();
