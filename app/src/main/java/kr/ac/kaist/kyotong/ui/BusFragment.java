@@ -257,13 +257,6 @@ public class BusFragment extends Fragment {
         mapView = rootView.findViewById(R.id.mapView);
         mapView.setVisibility(View.INVISIBLE);
         mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                BusFragment.this.googleMap = googleMap;
-                initializeGoogleMap();
-            }
-        });
 
         /**
          *
@@ -356,6 +349,14 @@ public class BusFragment extends Fragment {
             mTimer.schedule(mBusTimerTask, ( 1000 - Calendar.getInstance().get(Calendar.MILLISECOND)) % 1000, 1000);
 
             mBusApiTask = null;
+
+            mapView.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap googleMap) {
+                    BusFragment.this.googleMap = googleMap;
+                    initializeGoogleMap(busStationModels);
+                }
+            });
         }
 
         /**
@@ -696,12 +697,14 @@ public class BusFragment extends Fragment {
     }
 
 
-    public void initializeGoogleMap() {
-        final BusApi busApi = new BusApi(R.string.tab_kaist_wolpyeong);
+    public void initializeGoogleMap(final ArrayList<BusStationModel> busStationModels) {
+//        final BusApi busApi = new BusApi(R.string.tab_kaist_wolpyeong);
 
-        final ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
+//        final ArrayList<BusStationModel> busStationModels = (ArrayList<BusStationModel>) busApi.getResult().get("busStations");
 
-        int padding = -5;
+
+        // Google map bounds
+        int padding = 100;
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
         for (int i = 0; i < busStationModels.size(); i++) {
@@ -721,6 +724,11 @@ public class BusFragment extends Fragment {
 
             // polyline at path
             ArrayList<LatLng> pointsOnPathToNextStation = (ArrayList<LatLng>) bm.pointsOnPathToNextStation.clone();
+
+            // include bounds
+            for (LatLng pnt : pointsOnPathToNextStation) {
+                builder.include(pnt);
+            }
 
             pointsOnPathToNextStation.add(0, thisStation);
             if (i < busStationModels.size() - 1) {
