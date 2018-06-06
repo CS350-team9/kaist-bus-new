@@ -1,5 +1,7 @@
 package kr.ac.kaist.kyotong.api;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -14,7 +16,7 @@ import kr.ac.kaist.kyotong.utils.DateUtils;
 
 
 public class BusApi extends ApiBase {
-    private final static String TAG = "BusApi";
+    private final static String TAG = BusApi.class.getName();
 
     private ArrayList<BusStationModel> busStationModels;
     private ArrayList<BusModel> buses = new ArrayList<>();
@@ -404,6 +406,9 @@ public class BusApi extends ApiBase {
                 }
 
                 break;
+
+            default:
+                Log.e(TAG, String.format("잘못된 버스 노선 ID입니다 (%d)", title_id));
         }
         return busStationModels;
     }
