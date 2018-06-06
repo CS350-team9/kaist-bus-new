@@ -16,7 +16,6 @@ import android.util.Log;
 import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusModel;
-import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
 import kr.ac.kaist.kyotong.utils.ViewIdGenerator;
 
@@ -25,11 +24,11 @@ import kr.ac.kaist.kyotong.utils.ViewIdGenerator;
  * <br>정거장은 원 바깥쪽에 작은 아이콘으로, 각 버스는 더 작은 아이콘으로 표시한다.
  */
 public class CircularBusRouteMapView extends ConstraintLayout {
-    ArrayList<View>     busIcons            = null;
-    ArrayList<View>     stationIcons        = null;
-    ArrayList<TextView> stationNameViews    = null;
-    View                centerCircle        = null;
-    OnStationClickListener stationClickListener = null;
+    private ArrayList<View>     busIcons            = null;
+    private ArrayList<View>     stationIcons        = null;
+    private ArrayList<TextView> stationNameViews    = null;
+    private View                centerCircle        = null;
+    private OnStationClickListener stationClickListener = null;
 
     public CircularBusRouteMapView(Context context) {
         super(context);
@@ -81,57 +80,62 @@ public class CircularBusRouteMapView extends ConstraintLayout {
             }
         }
 
+        View.OnClickListener iconClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (stationClickListener == null)
+                    return;
+
+                int stationIndex = (Integer) v.getTag(R.id.CIRCULAR_MAP_STATION_INDEX);
+
+                Log.d("Station clicked: ", String.format("%d", stationIndex));
+
+                for (View stationIcon : stationIcons)
+                    stationIcon.setBackgroundResource(R.drawable.bus_fragment_station);
+                stationIcons.get(stationIndex).setBackgroundResource(R.drawable.bus_fragment_station_selected);
+
+                for (TextView stationNameView : stationNameViews)
+                    stationNameView.setTypeface(null, Typeface.NORMAL);
+                stationNameViews.get(stationIndex).setTypeface(null, Typeface.BOLD);
+
+                stationClickListener.onStationClick(stationIndex);
+            }
+        };
+
         int mainContentHeight = SizeUtils.getMainContentHeight(getContext());
         final int stationIconRadius = (int) (((float) mainContentHeight) * 0.06f);
 
+        //정거장 아이콘 수가 부족하면 추가
         while (stationIcons.size() < stations.size()) {
             View stationIcon = new View(getContext());
             stationIcon.setId(ViewIdGenerator.generateViewId());
             stationIcon.setBackgroundResource(R.drawable.bus_fragment_station);
             stationIcon.setLayoutParams(new FrameLayout.LayoutParams(stationIconRadius, stationIconRadius));
+            stationIcon.setTag(R.id.CIRCULAR_MAP_STATION_INDEX, stationIcons.size());           //지금 추가된 아이콘의 순서 == 정거장 인덱스
+            stationIcon.setOnClickListener(iconClickListener);
             stationIcons.add(stationIcon);
             addView(stationIcon);
+            Log.d("Station tag set: ", String.format("%d => %d", R.id.CIRCULAR_MAP_STATION_INDEX, stationIcons.size() - 1));
 
             TextView stationNameView = new TextView(getContext());
             stationNameView.setId(ViewIdGenerator.generateViewId());
+            stationNameView.setTag(R.id.CIRCULAR_MAP_STATION_INDEX, stationNameViews.size());   //지금 추가된 이름표의 순서 == 정거장 인덱스
+            stationNameView.setOnClickListener(iconClickListener);
             stationNameViews.add(stationNameView);
             addView(stationNameView);
+
+            Log.d("Station tag set: ", String.format("%d => %d", R.id.CIRCULAR_MAP_STATION_INDEX, stationNameViews.size() - 1));
         }
 
+        //정거장 아이콘 수가 너무 많으면 삭제
         while (stationIcons.size() > stations.size()) {
             removeView(stationIcons.remove(stationIcons.size() - 1));
             removeView(stationNameViews.remove(stationNameViews.size() - 1));
         }
 
-        final OnStationClickListener listener = stationClickListener;
-
-        for (int i = 0; i < stations.size(); ++i) {
-            final int stationIndex = i;
+        //정거장 이름표의 텍스트 설정
+        for (int i = 0; i < stations.size(); ++i)
             stationNameViews.get(i).setText(stations.get(i).getFullName());
-            View.OnClickListener iconClickListener = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    System.out.println("clicked!");
-                    for (View stationIcon : stationIcons)
-                        stationIcon.setBackgroundResource(R.drawable.bus_fragment_station);
-                    stationIcons.get(stationIndex).setBackgroundResource(R.drawable.bus_fragment_station_selected);
-
-                    System.out.println("clicked!2");
-
-                    for (TextView stationNameView : stationNameViews)
-                        stationNameView.setTypeface(null, Typeface.NORMAL);
-                    stationNameViews.get(stationIndex).setTypeface(null, Typeface.BOLD);
-
-                    System.out.println("clicked!3");
-
-                    listener.onStationClick(stationIndex);
-
-                    System.out.println("clicked!4");
-                }
-            };
-            stationIcons.get(i).setOnClickListener(iconClickListener);
-            stationNameViews.get(i).setOnClickListener(iconClickListener);
-        }
 
         int centerCircleRadius      = centerCircle.getWidth() / 2;
         int stationIconOffset       = (int) (centerCircleRadius * 1.25);

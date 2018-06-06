@@ -372,6 +372,7 @@ public class BusFragment extends Fragment {
         showErrorView(true, "");
 
         final BusStationModel busStationModel = busStationModels.get(index);
+        Log.d(TAG, String.format("시간표를 표시할 정거장 번호: %d, 이름: %s", index, busStationModels.get(index).getFullName()));
 
         //기존의 버스 시간표를 지우고 새로운 시간표를 생성한다.
         mLvAdapter.listItems.clear();
