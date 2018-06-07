@@ -506,12 +506,7 @@ public class BusApi extends ApiBase {
         //이후의 정거장 추가
         for (int deltaMin : deltaMinutes) {
             offset = (offset + 1) % busStationModels.size();
-            visitTime = visitTime.addTime(0, deltaMin, 0);
-            bus.addNextStation(busStationModels.get(offset), visitTime);
-            Log.d(TAG, String.format("Added %02d:%02d to station %s",
-                    visitTime.getHours(),
-                    visitTime.getMinutes(),
-                    busStationModels.get(offset).getFullName()));
+            bus.addNextStation(busStationModels.get(offset), visitTime.addTime(0, deltaMin, 0));
         }
 
         return bus;
