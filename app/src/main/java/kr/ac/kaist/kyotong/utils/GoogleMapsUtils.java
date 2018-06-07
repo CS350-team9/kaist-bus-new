@@ -1,8 +1,5 @@
 package kr.ac.kaist.kyotong.utils;
 
-import android.util.Log;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,14 +31,12 @@ public final class GoogleMapsUtils {
             return points.get(0);
 
         double totalDistance = 0;
-//        ArrayList<Double> cumulativeDistances = new ArrayList<Double>(points.size());
-        ArrayList<Double> cumulativeDistances = new ArrayList<>(Arrays.asList(new Double[points.size()]));
-
-        cumulativeDistances.set(0, 0.0);
+        ArrayList<Double> cumulativeDistances = new ArrayList<>(points.size());
+        cumulativeDistances.add(totalDistance);
 
         for (int i = 0; i < points.size() - 1; ++i) {
             totalDistance += SphericalUtil.computeDistanceBetween(points.get(i), points.get(i + 1));
-            cumulativeDistances.set(i, totalDistance);
+            cumulativeDistances.add(totalDistance);
         }
 
         int pointIndex = Collections.binarySearch(cumulativeDistances, fraction * totalDistance);
@@ -57,7 +52,7 @@ public final class GoogleMapsUtils {
 
             int beginPointIndex = endPointIndex - 1;
             LatLng beginPoint = points.get(beginPointIndex), endPoint = points.get(endPointIndex);
-            double segmentFraction = fraction - cumulativeDistances.get(beginPointIndex);
+            double segmentFraction = fraction - cumulativeDistances.get(beginPointIndex) / totalDistance;
             return SphericalUtil.interpolate(beginPoint, endPoint, segmentFraction);
         }
     }
