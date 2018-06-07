@@ -2,6 +2,7 @@ package kr.ac.kaist.kyotong;
 
 import kr.ac.kaist.kyotong.api.BusApi;
 import kr.ac.kaist.kyotong.api.BusRouteData;
+import kr.ac.kaist.kyotong.model.BusModel;
 
 import org.junit.Test;
 
@@ -13,15 +14,14 @@ public class BusApiTest {
         BusApi busApi = new BusApi(R.string.tab_kaist_olev);
         BusRouteData data = busApi.getResult();
 
-        //BusModel.stations의 길이를 외부에서 구할 방법이 없으므로 비정상적인 방법으로 구해야 한다.
-        int stationCount = 0;
-        try {
-            while (data.buses.get(0).getStation(stationCount) != null)
-                ++stationCount;
+        for (int busIndex = 0; busIndex < data.buses.size(); ++busIndex) {
+            BusModel bus = data.buses.get(busIndex);
+            assertEquals(
+                    String.format("총 정거장 수와 버스 %d이(가) 방문하는 정거장 수가 같아야 한다.", busIndex),
+                    data.stations.size(),
+                    bus.stationCount()
+            );
         }
-        catch (IndexOutOfBoundsException e) {}
-
-        assertEquals("총 정거장 수와 버스가 방문하는 정거장 수가 같아야 한다.", data.stations.size(), stationCount);
     }
 
     @Test
@@ -29,15 +29,12 @@ public class BusApiTest {
         BusApi busApi = new BusApi(R.string.tab_kaist_sunhwan);
         BusRouteData data = busApi.getResult();
 
-        //BusModel.stations의 길이를 외부에서 구할 방법이 없으므로 비정상적인 방법으로 구해야 한다.
-        int stationCount = 0;
-        try {
-            while (data.buses.get(0).getStation(stationCount) != null)
-                ++stationCount;
-        }
-        catch (IndexOutOfBoundsException e) {}
-
-        assertEquals("총 정거장 수와 버스가 방문하는 정거장 수가 같아야 한다.", data.stations.size(), stationCount);
+        BusModel bus = data.buses.get(0);
+        assertEquals(
+                "총 정거장 수와 버스 0이 방문하는 정거장 수가 같아야 한다.",
+                data.stations.size(),
+                bus.stationCount()
+        );
     }
 
     @Test
@@ -45,14 +42,13 @@ public class BusApiTest {
         BusApi busApi = new BusApi(R.string.tab_kaist_wolpyeong);
         BusRouteData data = busApi.getResult();
 
-        //BusModel.stations의 길이를 외부에서 구할 방법이 없으므로 비정상적인 방법으로 구해야 한다.
-        int stationCount = 0;
-        try {
-            while (data.buses.get(0).getStation(stationCount) != null)
-                ++stationCount;
+        for (int busIndex = 0; busIndex < data.buses.size(); ++busIndex) {
+            BusModel bus = data.buses.get(busIndex);
+            assertEquals(
+                    String.format("총 정거장 수와 버스 %d이(가) 방문하는 정거장 수가 같아야 한다.", busIndex),
+                    data.stations.size(),
+                    bus.stationCount()
+            );
         }
-        catch (IndexOutOfBoundsException e) {}
-
-        assertEquals("총 정거장 수와 버스가 방문하는 정거장 수가 같아야 한다.", data.stations.size(), stationCount);
     }
 }
