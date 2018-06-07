@@ -4,7 +4,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -521,14 +520,7 @@ public class BusApi extends ApiBase {
     /**
      * 결과를 반환합니다.
      */
-
-    public HashMap<String, Object> getResult() {
-
-        HashMap<String, Object> map = new HashMap<String, Object>();
-
-        map.put("busStations", busStationModels);
-        map.put("buses", buses);
-
-        return map;
+    public BusRouteData getResult() {
+        return new BusRouteData(busStationModels, buses);
     }
 }

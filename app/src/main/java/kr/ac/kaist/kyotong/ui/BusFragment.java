@@ -32,13 +32,13 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
 import kr.ac.kaist.kyotong.R;
+import kr.ac.kaist.kyotong.api.BusRouteData;
 import kr.ac.kaist.kyotong.model.BusModel;
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
@@ -302,8 +302,7 @@ public class BusFragment extends Fragment {
     /**
      *
      */
-    public class BusApiTask extends AsyncTask<Integer, HashMap<String, Object>, HashMap<String, Object>> {
-
+    public class BusApiTask extends AsyncTask<Integer, BusRouteData, BusRouteData> {
         @Override
         protected void onPreExecute() {
             mShowErrorView = true;
@@ -315,22 +314,15 @@ public class BusFragment extends Fragment {
          * @return
          */
         @Override
-        protected HashMap<String, Object> doInBackground(Integer... params) {
+        protected BusRouteData doInBackground(Integer... params) {
             BusApi busApi = new BusApi(params[0]);
             return busApi.getResult();
         }
 
-        /**
-         * @param maps
-         */
         @Override
-        protected void onPostExecute(HashMap<String, Object> maps) {
-
-            /**
-             *  Setting results
-             */
-            busStationModels.addAll((ArrayList<BusStationModel>) maps.get("busStations"));
-            buses.addAll((ArrayList<BusModel>) maps.get("buses"));
+        protected void onPostExecute(BusRouteData data) {
+            busStationModels.addAll(data.stations);
+            buses.addAll(data.buses);
 
             circularBusRouteMapView.setOnStationClickListener(new CircularBusRouteMapView.OnStationClickListener() {
                 @Override
@@ -359,11 +351,10 @@ public class BusFragment extends Fragment {
         }
 
         /**
-         *
+         * Task가 취소되었을 경우 호출됨
          */
         @Override
         protected void onCancelled() {
-            super.onCancelled();
             mBusApiTask = null;
         }
     }
