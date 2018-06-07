@@ -37,6 +37,15 @@ public class BusTimeListBusTime extends BusTimeListItem {
 
 
     /**
+     * 이 객체가 가리키는 버스 도착 시간을 돌려준다.
+     *
+     * @return 버스 시간 객체
+     */
+    public BusTimeModel getBusTime() {
+        return busTime;
+    }
+
+    /**
      * 버스 도착 시간이 현재 시간과 비교하여 60초 이상 지났으면 버스 시간표에서 삭제한다.
      *
      * @return

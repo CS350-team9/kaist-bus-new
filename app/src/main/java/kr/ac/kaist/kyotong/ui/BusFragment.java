@@ -34,6 +34,7 @@ import java.util.TimerTask;
 
 import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.adapters.BusTimeListAdapter;
+import kr.ac.kaist.kyotong.alarm.Alarms;
 import kr.ac.kaist.kyotong.api.BusRouteData;
 import kr.ac.kaist.kyotong.model.BusModel;
 import kr.ac.kaist.kyotong.model.BusStationModel;
@@ -234,6 +235,8 @@ public class BusFragment extends Fragment {
                 Toast t = Toast.makeText(getActivity(), debugMessage, Toast.LENGTH_SHORT);
                 t.show();
                 Log.d(TAG, debugMessage);
+                BusTimeListBusTime busTimeItem = (BusTimeListBusTime) mLv.getItemAtPosition(position);
+                Alarms.setAlarm(getActivity(), busTimeItem.getBusTime());
                 return true;
             }
         });
