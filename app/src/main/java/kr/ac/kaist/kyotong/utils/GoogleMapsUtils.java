@@ -52,7 +52,11 @@ public final class GoogleMapsUtils {
 
             int beginPointIndex = endPointIndex - 1;
             LatLng beginPoint = points.get(beginPointIndex), endPoint = points.get(endPointIndex);
-            double segmentFraction = fraction - cumulativeDistances.get(beginPointIndex) / totalDistance;
+
+            double beginPointFraction = cumulativeDistances.get(beginPointIndex) / totalDistance;
+            double endPointFraction = cumulativeDistances.get(endPointIndex) / totalDistance;
+
+            double segmentFraction = (fraction - beginPointFraction) / (endPointFraction - beginPointFraction);
             return SphericalUtil.interpolate(beginPoint, endPoint, segmentFraction);
         }
     }
