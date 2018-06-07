@@ -3,6 +3,8 @@ package kr.ac.kaist.kyotong.model;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import kr.ac.kaist.kyotong.utils.DateUtils;
+
 /**
  * Created by yearnning on 14. 12. 20..
  * <br>기점에서 종점까지 운행하는 버스를 나타내는 클래스
@@ -51,8 +53,8 @@ public class BusModel {
      * @param time 시간 값
      * @return 버스 운행 여부
      */
-    public boolean isActive(BusTimeModel time) {
-        long seconds = time.getAbsoluteSeconds();
+    public boolean isActive(Calendar time) {
+        long seconds = DateUtils.toAbsoluteSeconds(time);
         long departureSeconds = visitTimes.get(0).getAbsoluteSeconds();
         long arrivalSeconds = visitTimes.get(visitTimes.size() - 1).getAbsoluteSeconds();
 
@@ -69,7 +71,7 @@ public class BusModel {
      * @return 두 정거장 간의 이동 거리 (0 ~ 1), 운행 중인 버스가 아닐 경우 음수
      */
     public double getEstimatedProgressBetweenStations(Calendar time) {
-        int nextStationIndex = getNextStationAt(time);
+        int nextStationIndex = getNextStationIndexAt(time);
 
         if (nextStationIndex == 0 || nextStationIndex == stations.size())
             return -1.0;
@@ -89,7 +91,7 @@ public class BusModel {
      * @param time 시간
      * @return 다음 도착 예정인 정거장의 index (0 ... 버스 정거장 수)
      */
-    private int getNextStationAt(Calendar time) {
+    private int getNextStationIndexAt(Calendar time) {
         long seconds = time.getTimeInMillis() / 1000;
 
         int nextStationIndex = 0;
@@ -102,13 +104,45 @@ public class BusModel {
     }
 
     /**
+     * 이 버스가 주어진 시간에 운행 중일 때, 도착 예정인 정거장 객체에 대한 참조를 돌려준다.
+     *
+     * <p>만약 {@code time}이 운행 시간 이전이라면 기점을 반환하며, 운행 시간 이후라면 null을 반환한다.</p>
+     *
+     * @param time 현재 시각
+     * @return 다음 도착 예정인 정거장
+     */
+    public BusStationModel getNextStationAt(Calendar time) {
+        int nextStationIndex = getNextStationIndexAt(time);
+        if (nextStationIndex == stations.size())
+            return null;
+        else
+            return stations.get(nextStationIndex);
+    }
+
+    /**
+     * 이 버스가 주어진 시간에 운행 중일 때, 가장 최근에 출발한 정거장 객체에 대한 참조를 돌려준다.
+     *
+     * <p>만약 {@code time}이 운행 시간 이전이라면 null을 반환하며, 운행 시간 이후라면 종점을 반환한다.</p>
+     *
+     * @param time 현재 시각
+     * @return 가장 최근에 출발한 정거장
+     */
+    public BusStationModel getPrevStationAt(Calendar time) {
+        int prevStationIndex = getNextStationIndexAt(time) - 1;
+        if (prevStationIndex == -1)
+            return null;
+        else
+            return stations.get(prevStationIndex);
+    }
+
+    /**
      * 주어진 시간에 버스의 예상 위치를 계산하여 원형 그래프에 표시할 수 있는 각도로 돌려준다.
      *
      * @param time  시간
      * @return 각도 (0.0 <= value <= 360.0) / 운행 시간이 아닐 경우 음수
      */
     public float getAngle(Calendar time) {
-        int nextStationIndex = getNextStationAt(time);
+        int nextStationIndex = getNextStationIndexAt(time);
 
         if (nextStationIndex == 0 || nextStationIndex == stations.size())
             return -1;

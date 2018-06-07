@@ -32,11 +32,11 @@ public final class GoogleMapsUtils {
 
         double totalDistance = 0;
         ArrayList<Double> cumulativeDistances = new ArrayList<>(points.size());
-        cumulativeDistances.set(0, 0.0);
+        cumulativeDistances.add(totalDistance);
 
-        for (int i = 0; i < points.size(); ++i) {
+        for (int i = 0; i < points.size() - 1; ++i) {
             totalDistance += SphericalUtil.computeDistanceBetween(points.get(i), points.get(i + 1));
-            cumulativeDistances.set(i, totalDistance);
+            cumulativeDistances.add(totalDistance);
         }
 
         int pointIndex = Collections.binarySearch(cumulativeDistances, fraction * totalDistance);
@@ -52,7 +52,7 @@ public final class GoogleMapsUtils {
 
             int beginPointIndex = endPointIndex - 1;
             LatLng beginPoint = points.get(beginPointIndex), endPoint = points.get(endPointIndex);
-            double segmentFraction = fraction - cumulativeDistances.get(beginPointIndex);
+            double segmentFraction = fraction - cumulativeDistances.get(beginPointIndex) / totalDistance;
             return SphericalUtil.interpolate(beginPoint, endPoint, segmentFraction);
         }
     }

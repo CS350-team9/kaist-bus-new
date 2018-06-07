@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <com.google.android.gms.maps.MapView
+        <kr.ac.kaist.kyotong.ui.GoogleMapBusRouteMapView
             android:id="@+id/mapView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
