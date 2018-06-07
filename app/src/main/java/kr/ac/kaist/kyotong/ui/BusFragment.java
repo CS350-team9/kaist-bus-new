@@ -38,11 +38,6 @@ import android.widget.Switch;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
-//TODO Google Map 관련 코드를 Custom View 클래스에 몰아넣기
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-
 /**
  * 메인 화면의 버스 노선 탭에 대응하는 노선도를 표시하는 Fragment
  */
@@ -98,8 +93,6 @@ public class BusFragment extends Fragment {
 
     /** Custom View */
     CircularBusRouteMapView circularBusRouteMapView;
-    /** 원형 다이어그램과 구글 맵 중 하나를 토글하는 스위치 */
-    private Switch toggleGoogleMapButton;
     private ListView mLv;
     private BusTimeListAdapter mLvAdapter;
 
@@ -156,7 +149,11 @@ public class BusFragment extends Fragment {
         mLayout = (SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout);
 
         circularBusRouteMapView = rootView.findViewById(R.id.circular_bus_route_view);
-        toggleGoogleMapButton = rootView.findViewById(R.id.toggle_google_map_switch);
+        mapView = rootView.findViewById(R.id.mapView);
+        mapView.setVisibility(View.INVISIBLE);
+        mapView.onCreate(savedInstanceState);
+
+        Switch toggleGoogleMapButton = rootView.findViewById(R.id.toggle_google_map_switch);
 
         toggleGoogleMapButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -252,10 +249,6 @@ public class BusFragment extends Fragment {
 //                openBab();
 //            }
 //        });
-
-        mapView = rootView.findViewById(R.id.mapView);
-        mapView.setVisibility(View.INVISIBLE);
-        mapView.onCreate(savedInstanceState);
 
         /**
          *
