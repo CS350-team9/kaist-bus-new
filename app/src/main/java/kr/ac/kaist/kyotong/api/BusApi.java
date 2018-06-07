@@ -423,10 +423,10 @@ public class BusApi extends ApiBase {
 
         if (title_id == R.string.tab_kaist_sunhwan) {
             for (int h = 7; h < 26; h += 3)
-                buses.add(createBus(date, h, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, h, 50, new int[]{10, 20, 24, 40, 55, 60}, 0));
 
             for (int h = 9; h < 25; h += 3)
-                buses.add(createBus(date, h, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, h, 20, new int[]{10, 20, 24, 40, 55, 60}, 0));
         }
 
         return buses;
@@ -448,45 +448,45 @@ public class BusApi extends ApiBase {
              */
             case R.string.tab_kaist_olev:
                 for (int m = 30; m <= 3 * 60 + 45; m += 15)
-                    buses.add(createBus(date, 8, m, new int[]{0, 1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
+                    buses.add(createBus(date, 8, m, new int[]{1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
                 for (int m = 0; m <= 4 * 60; m += 15)
-                    buses.add(createBus(date, 13, m, new int[]{0, 1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
+                    buses.add(createBus(date, 13, m, new int[]{1, 2, 3, 4, 6, 7, 8, 9, 11}, 0));
                 break;
 
             case R.string.tab_kaist_wolpyeong:
                 for (int h = 9; h <= 17; h++) {
                     if (h != 12) {
-                        buses.add(createBus(date, h, 0, new int[]{0, 2, 4, 10, 15, 25, 32, 40, 43, 44, 45}, 0));
+                        buses.add(createBus(date, h, 0, new int[]{2, 4, 10, 15, 25, 32, 40, 43, 44, 45}, 0));
                     }
                 }
                 break;
 
             case R.string.tab_kaist_sunhwan:
-                buses.add(createBus(date, 7, 10, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 7, 40, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 8, 10, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 8, 40, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 9, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 9, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 10, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 10, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 11, 20, new int[]{0, 10, 20}, 0));
-                buses.add(createBus(date, 11, 50, new int[]{0, 10, 20, 24, 30}, 0));
+                buses.add(createBus(date, 7, 10, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 7, 40, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 8, 10, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 8, 40, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 9, 20, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 9, 50, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 10, 20, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 10, 50, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 11, 20, new int[]{10, 20}, 0));
+                buses.add(createBus(date, 11, 50, new int[]{10, 20, 24, 30}, 0));
 
-                buses.add(createBus(date, 13, 0, new int[]{0, 15, 20}, 4));
+                buses.add(createBus(date, 13, 0, new int[]{15, 20}, 4));
 
                 for (int h = 13; h < 27; h++) {
-                    buses.add(createBus(date, h, 20, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
+                    buses.add(createBus(date, h, 20, new int[]{10, 20, 24, 40, 55, 60}, 0));
                 }
 
-                buses.add(createBus(date, 16, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 17, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 18, 50, new int[]{0, 10, 20, 24, 40, 55, 60}, 0));
-                buses.add(createBus(date, 19, 50, new int[]{0, 10, 20}, 0));
-                buses.add(createBus(date, 21, 10, new int[]{0, 4, 20, 35, 40}, 2));
-                buses.add(createBus(date, 21, 50, new int[]{0, 10, 20}, 0));
+                buses.add(createBus(date, 16, 50, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 17, 50, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 18, 50, new int[]{10, 20, 24, 40, 55, 60}, 0));
+                buses.add(createBus(date, 19, 50, new int[]{10, 20}, 0));
+                buses.add(createBus(date, 21, 10, new int[]{4, 20, 35, 40}, 2));
+                buses.add(createBus(date, 21, 50, new int[]{10, 20}, 0));
 
-                buses.add(createBus(date, 27, 20, new int[]{0, 10, 20}, 0));
+                buses.add(createBus(date, 27, 20, new int[]{10, 20}, 0));
 
                 break;
 
