@@ -5,6 +5,7 @@ import android.widget.TextView;
 
 import java.util.Calendar;
 
+import kr.ac.kaist.kyotong.adapters.BusTimeListItem;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.DateUtils;
 

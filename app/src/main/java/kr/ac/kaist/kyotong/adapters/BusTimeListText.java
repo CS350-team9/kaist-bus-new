@@ -1,4 +1,4 @@
-package kr.ac.kaist.kyotong.ui;
+package kr.ac.kaist.kyotong.adapters;
 
 import android.view.View;
 import android.widget.TextView;

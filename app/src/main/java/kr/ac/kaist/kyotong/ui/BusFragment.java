@@ -1,6 +1,5 @@
 package kr.ac.kaist.kyotong.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -12,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -20,7 +18,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -31,18 +28,14 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.TreeMap;
 
 import kr.ac.kaist.kyotong.R;
+import kr.ac.kaist.kyotong.adapters.BusTimeListAdapter;
 import kr.ac.kaist.kyotong.api.BusRouteData;
 import kr.ac.kaist.kyotong.model.BusModel;
 import kr.ac.kaist.kyotong.model.BusStationModel;
-import kr.ac.kaist.kyotong.model.BusTimeModel;
-import kr.ac.kaist.kyotong.utils.DateUtils;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
 
 import kr.ac.kaist.kyotong.api.BusApi;
@@ -55,8 +48,6 @@ import android.widget.CompoundButton;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-
-import org.w3c.dom.Text;
 
 /**
  * 메인 화면의 버스 노선 탭에 대응하는 노선도를 표시하는 Fragment
@@ -119,7 +110,7 @@ public class BusFragment extends Fragment {
     /** 원형 다이어그램과 구글 맵 중 하나를 토글하는 스위치 */
     private Switch toggleGoogleMapButton;
     private ListView mLv;
-    private LvAdapter mLvAdapter;
+    private BusTimeListAdapter mLvAdapter;
 
     private View mErrorView;
     private TextView mErrorTv;
@@ -235,8 +226,7 @@ public class BusFragment extends Fragment {
             }
         });
 
-        ArrayList<BusTimeListItem> busTimeListItems = new ArrayList<>();
-        mLvAdapter = new LvAdapter(getActivity(), R.layout.bus_fragment_lv, busTimeListItems);
+        mLvAdapter = new BusTimeListAdapter(getActivity(), R.layout.bus_fragment_lv);
         mLv.setAdapter(mLvAdapter);
 
         mBusApiTask = new BusApiTask();
@@ -364,65 +354,21 @@ public class BusFragment extends Fragment {
      * @param index 클릭한 정거장을 나타내는 숫자 (0부터 시작)
      */
     private void updateStation(int index) {
-
         mUpdateStationRunning = true;
         mShowErrorView = true;
         showErrorView(true, "");
 
-        final BusStationModel busStationModel = busStationModels.get(index);
-        Log.d(TAG, String.format("시간표를 표시할 정거장 번호: %d, 이름: %s", index, busStationModels.get(index).getFullName()));
-
-        //기존의 버스 시간표를 지우고 새로운 시간표를 생성한다.
-        mLvAdapter.listItems.clear();
-
-        ArrayList<BusTimeModel> busTimes = busStationModel.getVisitTimes();
-
-        //구분자를 생성하기 위한 날짜
-        Calendar beginDate = Calendar.getInstance();
-
-        //구분자의 날짜가 버스 시간보다 더 미래일 경우 구분자의 날짜를 버스 시간과 같게 함
-        if (busTimes.size() > 0) {
-            Calendar firstBusTimeValue = busTimes.get(0).getTime();
-            if (DateUtils.compareDays(beginDate, firstBusTimeValue) > 0)
-                beginDate = firstBusTimeValue;
-        }
-
-        //버스 도착 시간을 날짜별로 묶는다
-        TreeMap<Calendar, ArrayList<BusTimeModel>> busTimesByDay = groupBusTimes(busTimes, beginDate);
-
-        //첫 구분자 추가
-        for (TreeMap.Entry<Calendar, ArrayList<BusTimeModel>> entry : busTimesByDay.entrySet()) {
-            Calendar date = entry.getKey();
-            BusTimeListDaySeparator header = new BusTimeListDaySeparator(date);
-            mLvAdapter.listItems.add(header);
-
-            ArrayList<BusTimeModel> busTimesInDay = entry.getValue();
-            if (busTimesInDay.isEmpty()) {
-                BusTimeListText textItem = new BusTimeListText(date, "주말 및 공휴일은 운행하지 않습니다");
-                mLvAdapter.listItems.add(textItem);
-
-                header.addRelatedListItem(textItem);
-            }
-            else {
-                for (BusTimeModel busTime : busTimesInDay) {
-                    BusTimeListBusTime busTimeListItem = new BusTimeListBusTime(busTime);
-                    mLvAdapter.listItems.add(busTimeListItem);
-
-                    //구분자 객체가 버스 시각 목록 객체를 참조함으로서 자신이 언제 삭제되어야 할지 확인할 수 있게 한다
-                    header.addRelatedListItem(busTimeListItem);
-                }
-            }
-        }
-
+        final BusStationModel station = busStationModels.get(index);
+        mLvAdapter.updateListFromStation(station);
         mLvAdapter.notifyDataSetChanged();
 
-        mNameTv.setText(busStationModel.getFullName());
+        mNameTv.setText(station.getFullName());
 
-        if (busStationModel.getCoordinates() != null) {
+        if (station.getCoordinates() != null) {
             mStationMapBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    MapManager mm = new MapManager(busStationModel.getCoordinates());
+                    MapManager mm = new MapManager(station.getCoordinates());
                     mm.showMap(getActivity());
 
                 }
@@ -432,11 +378,11 @@ public class BusFragment extends Fragment {
             mStationMapBtn.setVisibility(View.GONE);
         }
 
-        if (busStationModel.getImgResource() != -1) {
+        if (station.getImgResource() != -1) {
             mStationImgBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ImageActivity.startIntent(getActivity(), busStationModel.getImgResource());
+                    ImageActivity.startIntent(getActivity(), station.getImgResource());
                 }
             });
             mStationImgBtn.setVisibility(View.VISIBLE);
@@ -446,32 +392,6 @@ public class BusFragment extends Fragment {
 
         mUpdateStationRunning = false;
 
-    }
-
-    /**
-     * 버스 도착 시간 목록을 날짜별로 묶어서 돌려준다.
-     * @param busTimes
-     * @return (날짜) => (날짜에 해당하는 버스 시간 목록)
-     */
-    private static TreeMap<Calendar, ArrayList<BusTimeModel>> groupBusTimes(ArrayList<BusTimeModel> busTimes, Calendar beginDate) {
-        Calendar date = (Calendar) beginDate.clone();
-        TreeMap<Calendar, ArrayList<BusTimeModel>> busTimesByDay = new TreeMap<>();
-        ArrayList<BusTimeModel> currentList = new ArrayList<>();
-        busTimesByDay.put(date, currentList);
-
-        for (BusTimeModel busTime : busTimes) {
-            //새로운 날짜를 시작함
-            while (DateUtils.compareDays(date, busTime.getTime()) < 0) {
-                date = (Calendar) date.clone();
-                date.add(Calendar.DATE, 1);
-                currentList = new ArrayList<>();
-                busTimesByDay.put(date, currentList);
-            }
-
-            currentList.add(busTime);
-        }
-
-        return busTimesByDay;
     }
 
 
@@ -534,116 +454,6 @@ public class BusFragment extends Fragment {
 
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * ListView Apdater Setting
-     */
-    private class LvAdapter extends ArrayAdapter<BusTimeListItem> {
-        private static final String TAG = "BusFragment LvAdapter";
-
-        public ArrayList<BusTimeListItem> listItems;
-        private int textViewResourceId;
-
-        /**
-         * @param context
-         * @param textViewResourceId
-         * @param articles
-         */
-        public LvAdapter(Activity context, int textViewResourceId,
-                         ArrayList<BusTimeListItem> articles) {
-            super(context, textViewResourceId, articles);
-
-            this.textViewResourceId = textViewResourceId;
-            this.listItems = articles;
-
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return true;
-        }
-
-        @Override
-        public int getCount() {
-            return listItems.size();
-        }
-
-        @Override
-        public BusTimeListItem getItem(int position) {
-            return listItems.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            TextView headerTextView = null;
-            View contentView = null;
-            TextView timeTextView = null;
-            TextView remainingTimeTextView = null;
-
-            //목록을 처음 생성할 때
-            if (convertView == null) {
-                convertView = getActivity().getLayoutInflater()
-                        .inflate(textViewResourceId, null);
-
-                headerTextView = convertView.findViewById(R.id.header_tv);
-                contentView = convertView.findViewById(R.id.content_view);
-                timeTextView = convertView.findViewById(R.id.time_tv);
-                remainingTimeTextView = convertView.findViewById(R.id.left_tv);
-
-                //findViewById()는 속도가 느리므로 나중에 View를 빠르게 불러올 수 있게 저장한다
-                convertView.setTag(R.id.header_tv, headerTextView);
-                convertView.setTag(R.id.content_view, contentView);
-                convertView.setTag(R.id.time_tv, timeTextView);
-                convertView.setTag(R.id.left_tv, remainingTimeTextView);
-            } else {    // 이미 생성된 목록을 불러올 때
-                headerTextView = (TextView) convertView.getTag(R.id.header_tv);
-                contentView = (View) convertView.getTag(R.id.content_view);
-                timeTextView = (TextView) convertView.getTag(R.id.time_tv);
-                remainingTimeTextView = (TextView) convertView.getTag(R.id.left_tv);
-            }
-
-            this.getItem(position).updateListItemView(
-                    Calendar.getInstance(),
-                    headerTextView,
-                    contentView,
-                    timeTextView,
-                    remainingTimeTextView
-            );
-
-            return convertView;
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            return false;
-        }
-
-        private void updateBusTimeListItems(Calendar now) {
-            for (int i = 0; i < listItems.size(); ++i) {
-                if (listItems.get(i).hasExpired(now)) {
-                    listItems.remove(i);
-                    --i;
-                }
-            }
-
-            for (int i = 0; i < listItems.size(); ++i) {
-                BusTimeListItem listItem = listItems.get(i);
-                if (listItem instanceof BusTimeListDaySeparator) {
-                    BusTimeListDaySeparator separator = (BusTimeListDaySeparator) listItem;
-                    if (separator.hasNoRelatedItem()) {
-                        BusTimeListText noMoreBusText = new BusTimeListText(separator.getTime(), "당일 버스 운행은 종료되었습니다");
-                        listItems.add(i++, noMoreBusText);
-                        separator.addRelatedListItem(noMoreBusText);
-                    }
-                }
             }
         }
     }
