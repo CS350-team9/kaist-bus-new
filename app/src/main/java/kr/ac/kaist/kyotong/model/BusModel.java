@@ -80,7 +80,7 @@ public class BusModel {
         long arrivingTime = visitTimes.get(nextStationIndex).getAbsoluteSeconds();
 
         long seconds = time.getTimeInMillis() / 1000;
-        return 1.0 * (arrivingTime - seconds) / (arrivingTime - departingTime);
+        return 1.0 * (seconds - departingTime) / (arrivingTime - departingTime);
     }
 
     /**
