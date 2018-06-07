@@ -129,11 +129,7 @@ public class BusFragment extends Fragment {
     private ProgressBar mErrorPb;
 
     //TODO Google Map 관련 코드
-    private MapView mapView = null;
-    private Marker lastClicked = null;
-    private GoogleMap googleMap = null;
-    private Marker busMarker = null;
-
+    private GoogleMapBusRouteMapView mapView = null;
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -189,6 +185,8 @@ public class BusFragment extends Fragment {
                 if (isChecked) {
                     circularBusRouteMapView.setVisibility(View.GONE);
                     mapView.setVisibility(View.VISIBLE);
+                    mapView.updateStations(busStationModels);
+                    mapView.updateBuses(buses);
                 }
                 else {
                     circularBusRouteMapView.setVisibility(View.VISIBLE);
@@ -345,6 +343,15 @@ public class BusFragment extends Fragment {
             });
             circularBusRouteMapView.updateStations(busStationModels);
 
+            mapView.setOnStationClickListener(new GoogleMapBusRouteMapView.OnStationClickListener() {
+                @Override
+                public void onStationClick(int stationIndex) {
+                    updateStation(stationIndex);
+                    Log.w("onClick", "onClicked");
+                }
+            });
+            mapView.updateStations(busStationModels);
+
             updateStation(0);
 
             mBusTimerTask = new BusTimerTask();
@@ -353,13 +360,7 @@ public class BusFragment extends Fragment {
 
             mBusApiTask = null;
 
-            mapView.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(GoogleMap googleMap) {
-                    BusFragment.this.googleMap = googleMap;
-                    initializeGoogleMap(busStationModels);
-                }
-            });
+            mapView.initializeGoogleMap();
         }
 
         /**
@@ -495,8 +496,6 @@ public class BusFragment extends Fragment {
 
         private boolean show_colon = false;
         Handler handler = new Handler();
-        double fraction = 0.00;
-        LatLng nowPosition = null;
 
         @Override
         public void run() {
@@ -528,14 +527,8 @@ public class BusFragment extends Fragment {
 
                 handler.post(new Runnable() {
                                  public void run() {
-                                     Log.w("sizeof1", Integer.toString(busStationModels.get(1).getPathToNextStation().size()));
-                                     nowPosition = GoogleMapsUtils.interpolate(busStationModels.get(1).getPathToNextStation(), fraction);
-                                     fraction += 0.5;
-
-                                     busMarker.setPosition(nowPosition);
-                                     Log.w("nowLocation", busMarker.getPosition().toString());
-
                                      circularBusRouteMapView.updateBuses(buses);
+                                     mapView.updateBuses(buses);
 
                                      mLvAdapter.notifyDataSetChanged();
                                      if (mShowErrorView && !mUpdateStationRunning && mBusApiTask == null) {
@@ -649,10 +642,6 @@ public class BusFragment extends Fragment {
             return false;
         }
 
-        private void updateFraction(Calendar now) {
-
-        }
-
         private void updateBusTimeListItems(Calendar now) {
             for (int i = 0; i < listItems.size(); ++i) {
                 if (listItems.get(i).hasExpired(now)) {
@@ -735,87 +724,6 @@ public class BusFragment extends Fragment {
     public void onLowMemory() {
         mapView.onLowMemory();
         super.onLowMemory();
-    }
-
-
-    public void initializeGoogleMap(final ArrayList<BusStationModel> busStationModels) {
-        // Google map bounds
-        int padding = 100;
-        int polylineColor = Color.rgb(10, 53, 115);
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-
-        for (int i = 0; i < busStationModels.size(); i++) {
-            BusStationModel bm = busStationModels.get(i);
-            // marker at stations;
-            LatLng loc = bm.getCoordinates();
-            LatLng thisStation = new LatLng(loc.latitude, loc.longitude);
-            builder.include(thisStation);
-
-            // for test
-            if (i == 0) {
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(thisStation);
-                markerOptions.title("Bus");
-                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("ic_bus", 56, 56)));
-                busMarker = googleMap.addMarker(markerOptions);
-            }
-
-            if (i != busStationModels.size() - 1) {
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(thisStation);
-                markerOptions.title(bm.getName());
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                googleMap.addMarker(markerOptions);
-            }
-
-            // polyline at path
-            ArrayList<LatLng> pointsOnPathToNextStation = (ArrayList<LatLng>) bm.getPathToNextStation().clone();
-
-            // include bounds
-            for (LatLng pnt : pointsOnPathToNextStation) {
-                builder.include(pnt);
-            }
-
-            pointsOnPathToNextStation.add(0, thisStation);
-            if (i < busStationModels.size() - 1) {
-                LatLng coords = busStationModels.get(i+1).getCoordinates();
-                pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(coords.latitude, coords.longitude));
-            }
-            PolylineOptions polylineOptions = new PolylineOptions();
-            polylineOptions.color(polylineColor);
-            polylineOptions.width(15);
-            polylineOptions.addAll(pointsOnPathToNextStation);
-            googleMap.addPolyline(polylineOptions);
-
-        }
-
-        LatLngBounds bounds = builder.build();
-        final CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-        googleMap.animateCamera(cu);
-
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                if (marker.equals(busMarker)) {
-                    return true;
-                }
-                int idx = busStationModels.indexOf(new BusStationModel(marker.getTitle()));
-                if (lastClicked != null) {
-                    lastClicked.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                }
-                marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                lastClicked = marker;
-                updateStation(idx);
-                return true;
-            }
-        });
-
-    }
-
-    public Bitmap resizeMapIcons(String iconName, int width, int height){
-        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),getResources().getIdentifier(iconName, "drawable", getActivity().getPackageName()));
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
-        return resizedBitmap;
     }
 }
 
