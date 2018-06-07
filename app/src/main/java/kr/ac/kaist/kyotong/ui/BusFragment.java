@@ -1,7 +1,6 @@
 package kr.ac.kaist.kyotong.ui;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,14 +16,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
@@ -95,9 +86,6 @@ public class BusFragment extends Fragment {
      */
     ArrayList<BusStationModel> busStationModels = new ArrayList<BusStationModel>();
     ArrayList<BusModel> buses = new ArrayList<BusModel>();
-    private int current_hour = -1;
-    private int current_minute = -1;
-    private int current_second = -1;
 
     /**
      *
@@ -113,7 +101,7 @@ public class BusFragment extends Fragment {
     /** 원형 다이어그램과 구글 맵 중 하나를 토글하는 스위치 */
     private Switch toggleGoogleMapButton;
     private ListView mLv;
-    private LvAdapter mLvAdapter;
+    private BusTimeListAdapter mLvAdapter;
 
     private View mErrorView;
     private TextView mErrorTv;
