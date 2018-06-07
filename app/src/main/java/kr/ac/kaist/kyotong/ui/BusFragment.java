@@ -2,6 +2,8 @@ package kr.ac.kaist.kyotong.ui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -43,6 +45,7 @@ import kr.ac.kaist.kyotong.model.BusModel;
 import kr.ac.kaist.kyotong.model.BusStationModel;
 import kr.ac.kaist.kyotong.model.BusTimeModel;
 import kr.ac.kaist.kyotong.utils.DateUtils;
+import kr.ac.kaist.kyotong.utils.GoogleMapsUtils;
 import kr.ac.kaist.kyotong.utils.SizeUtils;
 
 import kr.ac.kaist.kyotong.api.BusApi;
@@ -129,6 +132,7 @@ public class BusFragment extends Fragment {
     private MapView mapView = null;
     private Marker lastClicked = null;
     private GoogleMap googleMap = null;
+    private Marker busMarker = null;
 
 
     /**
@@ -491,6 +495,8 @@ public class BusFragment extends Fragment {
 
         private boolean show_colon = false;
         Handler handler = new Handler();
+        double fraction = 0.00;
+        LatLng nowPosition = null;
 
         @Override
         public void run() {
@@ -515,12 +521,20 @@ public class BusFragment extends Fragment {
 
                 current_minute = (absolute_second / 60) % 60;
                 current_second = absolute_second % 60;
+
                 show_colon = !show_colon;
 
                 mLvAdapter.updateBusTimeListItems(c);
 
                 handler.post(new Runnable() {
                                  public void run() {
+                                     Log.w("sizeof1", Integer.toString(busStationModels.get(1).getPathToNextStation().size()));
+                                     nowPosition = GoogleMapsUtils.interpolate(busStationModels.get(1).getPathToNextStation(), fraction);
+                                     fraction += 0.5;
+
+                                     busMarker.setPosition(nowPosition);
+                                     Log.w("nowLocation", busMarker.getPosition().toString());
+
                                      circularBusRouteMapView.updateBuses(buses);
 
                                      mLvAdapter.notifyDataSetChanged();
@@ -635,6 +649,10 @@ public class BusFragment extends Fragment {
             return false;
         }
 
+        private void updateFraction(Calendar now) {
+
+        }
+
         private void updateBusTimeListItems(Calendar now) {
             for (int i = 0; i < listItems.size(); ++i) {
                 if (listItems.get(i).hasExpired(now)) {
@@ -723,6 +741,7 @@ public class BusFragment extends Fragment {
     public void initializeGoogleMap(final ArrayList<BusStationModel> busStationModels) {
         // Google map bounds
         int padding = 100;
+        int polylineColor = Color.rgb(10, 53, 115);
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
         for (int i = 0; i < busStationModels.size(); i++) {
@@ -731,6 +750,15 @@ public class BusFragment extends Fragment {
             LatLng loc = bm.getCoordinates();
             LatLng thisStation = new LatLng(loc.latitude, loc.longitude);
             builder.include(thisStation);
+
+            // for test
+            if (i == 0) {
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(thisStation);
+                markerOptions.title("Bus");
+                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("ic_bus", 56, 56)));
+                busMarker = googleMap.addMarker(markerOptions);
+            }
 
             if (i != busStationModels.size() - 1) {
                 MarkerOptions markerOptions = new MarkerOptions();
@@ -754,8 +782,8 @@ public class BusFragment extends Fragment {
                 pointsOnPathToNextStation.add(pointsOnPathToNextStation.size(), new LatLng(coords.latitude, coords.longitude));
             }
             PolylineOptions polylineOptions = new PolylineOptions();
-            polylineOptions.color(Color.RED);
-            polylineOptions.width(10);
+            polylineOptions.color(polylineColor);
+            polylineOptions.width(15);
             polylineOptions.addAll(pointsOnPathToNextStation);
             googleMap.addPolyline(polylineOptions);
 
@@ -768,6 +796,9 @@ public class BusFragment extends Fragment {
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                if (marker.equals(busMarker)) {
+                    return true;
+                }
                 int idx = busStationModels.indexOf(new BusStationModel(marker.getTitle()));
                 if (lastClicked != null) {
                     lastClicked.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
@@ -779,6 +810,12 @@ public class BusFragment extends Fragment {
             }
         });
 
+    }
+
+    public Bitmap resizeMapIcons(String iconName, int width, int height){
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),getResources().getIdentifier(iconName, "drawable", getActivity().getPackageName()));
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
+        return resizedBitmap;
     }
 }
 
