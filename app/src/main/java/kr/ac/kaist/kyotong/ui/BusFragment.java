@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -43,6 +44,7 @@ import kr.ac.kaist.kyotong.utils.MapManager;
 
 import android.widget.Switch;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 
 //TODO Google Map 관련 코드를 Custom View 클래스에 몰아넣기
 import com.google.android.gms.maps.MapView;
@@ -225,6 +227,26 @@ public class BusFragment extends Fragment {
 
         mLvAdapter = new BusTimeListAdapter(getActivity(), R.layout.bus_fragment_lv);
         mLv.setAdapter(mLvAdapter);
+        mLv.setOnItemLongClickListener(new ListView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                String debugMessage = String.format("List long-clicked: position %d / ID %d", position, id);
+                Toast t = Toast.makeText(getActivity(), debugMessage, Toast.LENGTH_SHORT);
+                t.show();
+                Log.d(TAG, debugMessage);
+                return true;
+            }
+        });
+
+        mLv.setOnItemClickListener(new ListView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String debugMessage = String.format("List clicked: position %d / ID %d", position, id);
+                Toast t = Toast.makeText(getActivity(), debugMessage, Toast.LENGTH_SHORT);
+                t.show();
+                Log.d(TAG, debugMessage);
+            }
+        });
 
         mBusApiTask = new BusApiTask();
         mBusApiTask.execute(title_id);

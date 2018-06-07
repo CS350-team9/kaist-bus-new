@@ -101,7 +101,7 @@ public class BusTimeListAdapter extends ArrayAdapter<BusTimeListItem> {
 
     @Override
     public boolean isEnabled(int position) {
-        return false;
+        return listItems.get(position) instanceof BusTimeListBusTime;
     }
 
     /**
