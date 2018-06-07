@@ -25,6 +25,7 @@ import kr.ac.kaist.kyotong.R;
 import kr.ac.kaist.kyotong.model.ShuttleModel;
 import kr.ac.kaist.kyotong.model.UniversityModel;
 import kr.ac.kaist.kyotong.utils.EmailManager;
+import kr.ac.kaist.kyotong.utils.Alarmmanager;
 import kr.ac.kaist.kyotong.utils.MainActivityDialogManager;
 import kr.ac.kaist.kyotong.utils.SmsManager;
 import kr.ac.kaist.kyotong.utils.prefs.PopupPreference;
@@ -242,10 +243,10 @@ public class MainActivity extends ActivityBase {
         } else if (id == R.id.action_sms) {
             SmsManager sm = new SmsManager(MainActivity.this, "01097650885");
             sm.showDialog();
+        } else if (id == R.id.action_alarm){
+            Alarmmanager am = new Alarmmanager(MainActivity.this);
+            am.startIntent();
         }
-//        } else if (id == R.id.action_alarm){
-//
-//        }
 //        } else if (id == R.id.action_change) {
 //            ShuttleActivity.startActivity(this);
 //        }

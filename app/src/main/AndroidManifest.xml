@@ -33,7 +33,7 @@
             android:name=".ui.ImageActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Bab.NoActionBar.Black" />
-
+<!--뭐가문제일까-->
         <!--<activity-->
             <!--android:name=".ui.ShuttleActivity"-->
             <!--android:label="탭 순서 변경하기"-->
