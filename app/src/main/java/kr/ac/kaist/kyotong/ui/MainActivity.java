@@ -243,6 +243,9 @@ public class MainActivity extends ActivityBase {
             SmsManager sm = new SmsManager(MainActivity.this, "01097650885");
             sm.showDialog();
         }
+//        } else if (id == R.id.action_alarm){
+//
+//        }
 //        } else if (id == R.id.action_change) {
 //            ShuttleActivity.startActivity(this);
 //        }
