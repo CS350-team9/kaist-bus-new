@@ -92,9 +92,6 @@ public class BusFragment extends Fragment {
      */
     ArrayList<BusStationModel> busStationModels = new ArrayList<BusStationModel>();
     ArrayList<BusModel> buses = new ArrayList<BusModel>();
-    private int current_hour = -1;
-    private int current_minute = -1;
-    private int current_second = -1;
 
     /**
      *
@@ -407,28 +404,9 @@ public class BusFragment extends Fragment {
         public void run() {
 
             try {
-                /**
-                 *
-                 */
-                Calendar c = Calendar.getInstance();
-
-                int absolute_second = c.get(Calendar.HOUR_OF_DAY) * 60 * 60 * 1000
-                        + c.get(Calendar.MINUTE) * 60 * 1000
-                        + c.get(Calendar.SECOND) * 1000
-                        + c.get(Calendar.MILLISECOND);
-
-                absolute_second /= 1000;
-
-                current_hour = (absolute_second / 3600) % 24;
-                if (current_hour < 4) {
-                    current_hour += 24;
-                }
-
-                current_minute = (absolute_second / 60) % 60;
-                current_second = absolute_second % 60;
                 show_colon = !show_colon;
 
-                mLvAdapter.updateBusTimeListItems(c);
+                mLvAdapter.updateBusTimeListItems(Calendar.getInstance());
 
                 handler.post(new Runnable() {
                                  public void run() {
