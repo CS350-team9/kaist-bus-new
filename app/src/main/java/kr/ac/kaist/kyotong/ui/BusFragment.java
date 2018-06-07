@@ -185,8 +185,6 @@ public class BusFragment extends Fragment {
                 if (isChecked) {
                     circularBusRouteMapView.setVisibility(View.GONE);
                     mapView.setVisibility(View.VISIBLE);
-                    mapView.updateStations(busStationModels);
-                    mapView.updateBuses(buses);
                 }
                 else {
                     circularBusRouteMapView.setVisibility(View.VISIBLE);
@@ -359,8 +357,6 @@ public class BusFragment extends Fragment {
             mTimer.schedule(mBusTimerTask, ( 1000 - Calendar.getInstance().get(Calendar.MILLISECOND)) % 1000, 1000);
 
             mBusApiTask = null;
-
-            mapView.initializeGoogleMap();
         }
 
         /**

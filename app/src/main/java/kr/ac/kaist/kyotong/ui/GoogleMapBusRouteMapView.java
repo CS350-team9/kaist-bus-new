@@ -69,37 +69,6 @@ public class GoogleMapBusRouteMapView extends MapView {
         stationClickListener = listener;
     }
 
-    /**
-     * 주의: 반드시 main thread에서 실행해야 한다!
-     */
-    public void initializeGoogleMap() {
-        getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap gMap) {
-                googleMap = gMap;
-
-                googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(Marker marker) {
-                        Object tag = marker.getTag();
-                        if (tag != null) { //버스 정거장 마커라고 가정한다
-                            int stationIndex = (Integer) tag;
-
-                            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                            if (lastClickedStation != null)
-                                lastClickedStation.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                            lastClickedStation = marker;
-
-                            if (stationClickListener != null)
-                                stationClickListener.onStationClick(stationIndex);
-                        }
-
-                        return true; //지도의 카메라가 마커로 이동하는 것과 정보창이 열리는 것을 방지함
-                    }
-                });
-            }
-        });
-    }
 
     /**
      * 정거장 아이콘 및 이름의 위치를 새로고침한다.
@@ -108,6 +77,14 @@ public class GoogleMapBusRouteMapView extends MapView {
     public void updateStations(ArrayList<BusStationModel> stations) {
         if (googleMap == null) {
             Log.w(TAG, "GoogleMap not initialized");
+            final ArrayList<BusStationModel> currentStations = (ArrayList<BusStationModel>) stations.clone();
+            getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap gMap) {
+                    setGoogleMap(gMap);
+                    updateStations(currentStations);
+                }
+            });
             return;
         }
 
@@ -173,6 +150,14 @@ public class GoogleMapBusRouteMapView extends MapView {
     public void updateBuses(ArrayList<BusModel> buses) {
         if (googleMap == null) {
             Log.w(TAG, "GoogleMap not initialized");
+            final ArrayList<BusModel> currentBuses = (ArrayList<BusModel>) buses.clone();
+            getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap gMap) {
+                    setGoogleMap(gMap);
+                    updateBuses(currentBuses);
+                }
+            });
             return;
         }
 
@@ -221,5 +206,36 @@ public class GoogleMapBusRouteMapView extends MapView {
         );
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
         return resizedBitmap;
+    }
+
+
+    /**
+     * 현재 인스턴스가 주어진 GoogleMap 객체를 참조하게 만들고, Marker 클릭에 대한 이벤트 리스너를 설정한다.
+     *
+     * @param gMap GoogleMap 객체
+     */
+    private void setGoogleMap(GoogleMap gMap) {
+        if (googleMap == null) {
+            googleMap = gMap;
+            googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    Object tag = marker.getTag();
+                    if (tag != null) { //버스 정거장 마커라고 가정한다
+                        int stationIndex = (Integer) tag;
+
+                        marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                        if (lastClickedStation != null)
+                            lastClickedStation.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        lastClickedStation = marker;
+
+                        if (stationClickListener != null)
+                            stationClickListener.onStationClick(stationIndex);
+                    }
+
+                    return true; //지도의 카메라가 마커로 이동하는 것과 정보창이 열리는 것을 방지함
+                }
+            });
+        }
     }
 }
